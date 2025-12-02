@@ -1,0 +1,24 @@
+# register
+{
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "SecurePassword123!"
+}
+
+# login
+{
+    "email": "john.doe@example.com",
+    "password": "SecurePassword123!"
+}
+# register
+{
+    "name": "John Doe",
+    "email": "example@example.com",
+    "password": "SecurePassword123!"
+}
+
+# login
+{
+    "email": "example@example.com",
+    "password": "SecurePassword123!"
+}
