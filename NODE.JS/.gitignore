@@ -1,0 +1,4 @@
+.env
+node_modules
+.DB_Store
+package-lock.json
