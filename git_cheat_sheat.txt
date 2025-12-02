@@ -1,3 +1,7 @@
 git pull origin main
 git push origin main
 git clone https://github.com/omerfrank/OrZarhi.git
+
+npm i
+npm start
+npm run dev
