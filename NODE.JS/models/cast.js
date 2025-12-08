@@ -1,24 +1,28 @@
 import mongoose from "mongoose";
-const userSchema = new mongoose.Schema({
+const castSchema = new mongoose.Schema({
 
-    username: {
+    name: {
         type: String,
         required: true,
         trim: true,
     },
-    email: {
+    bio: {
         type: String,
         required: true,
         trim: true,
-        unique: true,
     },
-    password:{
+    role: {
         type: String,
         required: true,
+        trim: true,
     },
-    lastSeen:{
-        type: Date
-    }
+    photoURL: {
+        type: String,
+    },
+    birthDay:{
+        type: Date,
+        required: true,
+    },
 },{timestamps: true});
 
-export default mongoose.model('User',userSchema);
+export default mongoose.model('Cast',castSchema);
