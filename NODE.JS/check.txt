@@ -1,6 +1,6 @@
 # register
 {
-    "name": "John Doe",
+    "username": "John Doe",
     "email": "john.doe@example.com",
     "password": "SecurePassword123!"
 }
@@ -12,7 +12,7 @@
 }
 # register
 {
-    "name": "John Doe",
+    "username": "John Doe",
     "email": "example@example.com",
     "password": "SecurePassword123!"
 }
