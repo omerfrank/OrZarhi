@@ -1,17 +1,37 @@
 import express from 'express';
+import session from 'express-session'; // Import session
+import MongoStore from 'connect-mongo'; // Import MongoStore
 import { connectDB } from './lib/connect.js';
-import handler from './routes/index.js'
-import cors from 'cors'
+import handler from './routes/index.js';
+import cors from 'cors';
+
 const app = express();
 const port = 3000;
 
-app.use(cors());
-app.use(express.json())
+app.use(cors({
+    origin: 'http://localhost:5173', // Your React app URL
+    credentials: true // Required for cookies/sessions to work
+}));
+app.use(express.json());
 
-console.log(process.env.DATABASE_URL)
-app.use('/api',handler);
-app.listen(port,()=>{ // IMPORTANT!! this part need to be last!
+app.use(session({
+    secret: 'zivIsTheZiviestOfaLLL123!!&',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.DATABASE_URL
+    }),
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24, // 1 day
+        httpOnly: true,
+        secure: false // Set to true if using HTTPS
+    }
+}));
+
+console.log(process.env.DATABASE_URL);
+app.use('/api', handler);
+
+app.listen(port, () => {
     connectDB();
     console.log(`server running at http://localhost:${port}`);
-    
-})
+});

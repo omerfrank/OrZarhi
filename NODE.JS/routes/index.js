@@ -11,13 +11,5 @@ router.get('/', (req, res) => {
 router.use('/auth',AuthHandler) 
 router.use('/react', ReactHandler)
 
-// test users
-router.get('/getall', async (req, res) => {
-  const users = await User.find({}).select('name');
-  return res.status(200).json({
-      success: true,
-      count: users.length,
-      data: users
-    });
-});
+
 export default router;
