@@ -1,7 +1,7 @@
 import express from 'express';
 import AuthHandler from './auth.routes.js';
 import ReactHandler from './react.routes.js';
-import User from '../models/user.js';
+import MovieHandler from './movie.routes.js';
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -10,6 +10,7 @@ router.get('/', (req, res) => {
 
 router.use('/auth',AuthHandler) 
 router.use('/react', ReactHandler)
+router.use('/movie', MovieHandler)
 
 
 export default router;
