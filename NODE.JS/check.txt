@@ -1,14 +1,14 @@
 # register
 {
-    "username": "John Doe",
-    "email": "john.doe@example.com",
-    "password": "SecurePassword123!"
+    "username": "ZiV9",
+    "email": "ziv123@gmail.com",
+    "password": "iamziv123!"
 }
 
 # login
 {
-    "email": "john.doe@example.com",
-    "password": "SecurePassword123!"
+    "email": "ziv123@gmail.com",
+    "password": "iamziv123!"
 }
 # register
 {
