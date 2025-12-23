@@ -71,7 +71,35 @@ export async function login(req, res) {
         return res.status(500).json({ success: false, error: 'internal error' });
     }
 }
+// Get a specific user by ID: GET /api/auth/:id
+export async function getUser(req, res) {
+    try {
+        const { id } = req.params;
+        // Find user by ID and exclude the password field
+        const user = await User.findById(id).select('-password').populate('favorites');
+        
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
 
+        return res.status(200).json({ success: true, data: user });
+    } catch (error) {
+        console.error("Get user error:", error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+}
+
+// Get all users: GET /api/auth/
+export async function getAllUsers(req, res) {
+    try {
+        // Fetch all users and exclude their passwords
+        const users = await User.find({}).select('-password');
+        return res.status(200).json({ success: true, count: users.length, data: users });
+    } catch (error) {
+        console.error("Get all users error:", error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+}
 export async function update(req, res) {
     try {
         // 1. Authenticate
