@@ -1,5 +1,5 @@
 import express from 'express';
-import AuthHandler from './auth.routes.js';
+import AuthHandler from './user.routes.js';
 import ReactHandler from './react.routes.js';
 import MovieHandler from './movie.routes.js';
 import CastHandler from './cast.routes.js';

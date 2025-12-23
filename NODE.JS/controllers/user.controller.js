@@ -142,3 +142,76 @@ export function logout(req, res) {
         return res.status(200).json({ success: true, message: "Logged out" });
     });
 }
+
+// favorite-movie: POST (userId, movieId)
+export async function addFavorite(req, res) {
+    try {
+        const { userId, movieId } = req.body;
+        
+        // Prioritize userId from body, fallback to session if available
+        const targetUserId = userId || req.session?.userId;
+
+        if (!targetUserId || !movieId) {
+            return res.status(400).json({ success: false, error: "UserId and MovieId are required" });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            targetUserId,
+            { $addToSet: { favorites: movieId } }, // addToSet prevents duplicates
+            { new: true }
+        ).select('favorites');
+
+        if (!user) {
+            return res.status(404).json({ success: false, error: "User not found" });
+        }
+
+        return res.status(200).json({ success: true, message: "Added to favorites", data: user.favorites });
+    } catch (error) {
+        console.error("Add favorite error:", error);
+        return res.status(500).json({ success: false, error: "Internal server error" });
+    }
+}
+
+// get-all-favorites: GET (userId)
+export async function getFavorites(req, res) {
+    try {
+        const { userId } = req.params;
+        
+        if (!userId) {
+            return res.status(400).json({ success: false, error: "UserId is required" });
+        }
+
+        const user = await User.findById(userId).populate('favorites');
+        
+        if (!user) return res.status(404).json({ success: false, error: "User not found" });
+
+        return res.status(200).json({ success: true, data: user.favorites });
+    } catch (error) {
+        console.error("Get favorites error:", error);
+        return res.status(500).json({ success: false, error: "Internal server error" });
+    }
+}
+
+// remove-favorite: PATCH (movieId)
+export async function removeFavorite(req, res) {
+    try {
+        const { movieId } = req.body; 
+        const userId = req.session?.userId; // Assuming removal is for the logged-in user
+
+        if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
+        if (!movieId) return res.status(400).json({ success: false, error: "MovieId is required" });
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { $pull: { favorites: movieId } }, // $pull removes the item from the array
+            { new: true }
+        ).select('favorites');
+
+        if (!user) return res.status(404).json({ success: false, error: "User not found" });
+
+        return res.status(200).json({ success: true, message: "Removed from favorites", data: user.favorites });
+    } catch (error) {
+        console.error("Remove favorite error:", error);
+        return res.status(500).json({ success: false, error: "Internal server error" });
+    }
+}
