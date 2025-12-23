@@ -7,7 +7,7 @@
 
 # login
 {
-    "email": "ziv123@gmail.com",
+    "email": "ziv123456789@gmail.com",
     "password": "iamziv123!"
 }
 # register
