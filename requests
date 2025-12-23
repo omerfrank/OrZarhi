@@ -1,15 +1,19 @@
-login: POST (password(hashed), email)
-log-out: POST
-sign-up: POST (password, email, username)
-update-user: UPDATE (userId, email, username)
-get-movie: GET (movieID)
-get-all-movies: GET ( [filters] )
-get-user: GET (UserId)
+login: POST (password(hashed), email) ✅
+log-out: POST ✅
+sign-up: POST (password, email, username) ✅
+update-user: UPDATE (userId, email, username) ✅
+get-movie: GET (movieID) ✅
+get-all-movies: GET ( [filters] ) ✅
+get-user: GET (UserId) ✅
 get-review: GET (ReviewId)
 get-all-reviews: GET (MovieID, [filters] )
-get-cast: GET (actorId)
-get-all-cast: GET (movieId)
+get-cast: GET (actorId) ✅
+get-all-cast: GET (movieId) ✅
 update-review: UPDATE (reviewId, rating, text, title)
-add-movie: POST (*Movie)
+add-movie: POST (*Movie) ✅
 add-review: POST (*Review)
-add-cast: POST (*Cast)
+add-cast: POST (*Cast) ✅
+favorite-movie: POST (userId, movieId)
+get-all-favorites: GET (userId)
+get-top-movies: GET
+remove-favorite: PATCH (movieId)
