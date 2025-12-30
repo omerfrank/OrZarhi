@@ -22,6 +22,13 @@
     "email": "example@example.com",
     "password": "SecurePassword123!"
 }
+
+# login
+{
+  "email": "omerKrong@123.org";
+  "password": "verystrongindeed123!@#";
+}
+
 # /api/cast
 {
   "name": "Keanu Reeves",
