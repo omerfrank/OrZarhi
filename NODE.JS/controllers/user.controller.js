@@ -89,6 +89,26 @@ export async function getUser(req, res) {
     }
 }
 
+export async function getMe(req, res) {
+    console.log(1);
+    try {
+        const userId = req.session?.userId;
+        if (!userId) {
+            console.log(2);
+            return res.status(401).json({ success: false, error: "Not authenticated" });
+        }
+        const user = await User.findById(userId).select('-password').populate('favorites');
+        if (!user) {
+            console.log(3);
+            return res.status(404).json({ success: false, error: "User not found" });
+        }
+        return res.status(200).json({ success: true, data: user });
+    } catch (error) {
+        console.error("Get me error:", error);
+        return res.status(500).json({ success: false, error: "Internal server error" });
+    }
+}
+
 // Get all users: GET /api/auth/
 export async function getAllUsers(req, res) {
     try {

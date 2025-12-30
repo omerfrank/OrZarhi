@@ -13,12 +13,13 @@ export default function UserProfile({ navigate, onLogout }) {
 
   const loadUserProfile = async () => {
     try {
-      const users = await fetch("http://localhost:3000/api/user", {
-        credentials: "include",
-      }).then((r) => r.json());
+      // Use getMe to get the actual logged-in user
+      const result = await api.getMe();
 
-      if (users.success && users.data.length > 0) {
-        setUser(users.data[0]);
+      if (result.success) {
+        setUser(result.data);
+      } else {
+        setError("Failed to load profile");
       }
     } catch (err) {
       setError("Failed to load profile");
@@ -85,7 +86,39 @@ export default function UserProfile({ navigate, onLogout }) {
               </div>
             </div>
 
-            <button onClick={handleLogout} style={styles.logoutButton}>
+            {/* Favorites Section */}
+            {user.favorites && user.favorites.length > 0 && (
+              <div style={{ marginTop: "30px" }}>
+                 <h3 style={{...styles.username, fontSize: "20px", marginBottom: "15px"}}>Favorite Movies</h3>
+                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
+                    {user.favorites.map(movie => (
+                       <div key={movie._id} style={{ 
+                         display: "flex", 
+                         gap: "10px", 
+                         background: "#f8f9fa", 
+                         padding: "10px", 
+                         borderRadius: "8px",
+                         alignItems: "center"
+                       }}>
+                          <img 
+                            src={movie.posterURL} 
+                            alt={movie.title}
+                            style={{ width: "50px", height: "75px", objectFit: "cover", borderRadius: "4px" }} 
+                            onError={(e) => e.target.src = "https://via.placeholder.com/50x75"}
+                          />
+                          <div>
+                            <div style={{ fontWeight: "bold" }}>{movie.title}</div>
+                            <div style={{ fontSize: "12px", color: "#666" }}>
+                              {new Date(movie.releaseDate).getFullYear()}
+                            </div>
+                          </div>
+                       </div>
+                    ))}
+                 </div>
+              </div>
+            )}
+
+            <button onClick={handleLogout} style={{...styles.logoutButton, marginTop: "30px"}}>
               Logout
             </button>
           </div>

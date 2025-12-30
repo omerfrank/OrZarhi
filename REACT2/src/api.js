@@ -42,4 +42,20 @@ export const api = {
     });
     return res.json();
   },
+  getMe: async () => {
+    const res = await fetch(`${API_BASE}/user/me`, {
+      credentials: "include",
+    });
+    return res.json();
+  },
+
+  addFavorite: async (movieId) => {
+    const res = await fetch(`${API_BASE}/user/add-favorite`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ movieId }),
+    });
+    return res.json();
+  },
 };

@@ -4,26 +4,65 @@ import { styles } from "./styles";
 
 export default function MovieLibrary({ navigate }) {
   const [movies, setMovies] = useState([]);
+  const [favorites, setFavorites] = useState(new Set()); // Store favorite IDs
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    loadMovies();
+    loadData();
   }, []);
 
-  const loadMovies = async () => {
+  const loadData = async () => {
     try {
-      const result = await api.getMovies();
-      if (result.success) {
-        setMovies(result.data);
+      // Fetch movies and user data in parallel
+      const [moviesRes, userRes] = await Promise.all([
+        api.getMovies(),
+        api.getMe()
+      ]);
+
+      if (moviesRes.success) {
+        setMovies(moviesRes.data);
       } else {
         setError("Failed to load movies");
       }
+
+      if (userRes.success) {
+        // Create a Set of favorite movie IDs for O(1) lookup
+        const favIds = new Set(userRes.data.favorites.map(f => f._id || f));
+        setFavorites(favIds);
+      }
+
     } catch (err) {
       setError("Network error");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleFavorite = async (e, movie) => {
+    e.stopPropagation(); // Prevent clicking the card event if any
+    const isFav = favorites.has(movie._id);
+    
+    // Optimistic UI update
+    const newFavorites = new Set(favorites);
+    if (isFav) {
+      newFavorites.delete(movie._id);
+    } else {
+      newFavorites.add(movie._id);
+    }
+    setFavorites(newFavorites);
+
+    try {
+      if (isFav) {
+        await api.removeFavorite(movie._id);
+      } else {
+        await api.addFavorite(movie._id);
+      }
+    } catch (err) {
+      // Revert on error
+      console.error("Failed to update favorite", err);
+      setFavorites(favorites);
     }
   };
 
@@ -70,7 +109,14 @@ export default function MovieLibrary({ navigate }) {
 
         <div style={styles.movieGrid}>
           {filteredMovies.map((movie) => (
-            <div key={movie._id} style={styles.movieCard}>
+            <div key={movie._id} style={{...styles.movieCard, ...styles.movieCardWrapper}}>
+              <button 
+                style={styles.starButton}
+                onClick={(e) => toggleFavorite(e, movie)}
+              >
+                {favorites.has(movie._id) ? "★" : "☆"}
+              </button>
+              
               <img
                 src={movie.posterURL}
                 alt={movie.title}
