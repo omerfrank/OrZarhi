@@ -107,9 +107,9 @@ export default function MovieLibrary({ navigate }) {
 
         {error && <p style={styles.error}>{error}</p>}
 
-        <div style={styles.movieGrid} onClick={() => navigate("/moviePage")}>
+        <div style={styles.movieGrid}>
           {filteredMovies.map((movie) => (
-            <div key={movie._id} style={{...styles.movieCard, ...styles.movieCardWrapper}}>
+            <div key={movie._id} style={{...styles.movieCard, ...styles.movieCardWrapper}} onClick={() => navigate(`/movie/${movie._id}`)}>
               <button 
                 style={styles.starButton}
                 onClick={(e) => toggleFavorite(e, movie)}

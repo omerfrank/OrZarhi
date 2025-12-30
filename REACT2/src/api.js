@@ -35,6 +35,12 @@ export const api = {
     });
     return res.json();
   },
+  getMovie: async (id) => {
+    const res = await fetch(`${API_BASE}/movie/${id}`, {
+      credentials: "include",
+    });
+    return res.json();
+  },
 
   getUser: async (userId) => {
     const res = await fetch(`${API_BASE}/user/${userId}`, {
@@ -47,6 +53,32 @@ export const api = {
   getMe: async () => {
     const res = await fetch(`${API_BASE}/user/me`, {
       credentials: "include",
+    });
+    return res.json();
+  },
+  // Fetch cast for a specific movie
+  getCastByMovie: async (movieId) => {
+    const res = await fetch(`${API_BASE}/cast/movie/${movieId}`, {
+      credentials: "include",
+    });
+    return res.json();
+  },
+
+  // Fetch reviews for a specific movie
+  getReviewsByMovie: async (movieId) => {
+    const res = await fetch(`${API_BASE}/review/movie/${movieId}`, {
+      credentials: "include",
+    });
+    return res.json();
+  },
+  
+  // You also need this for the review form submission
+  addReview: async (reviewData) => {
+    const res = await fetch(`${API_BASE}/review`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(reviewData),
     });
     return res.json();
   },

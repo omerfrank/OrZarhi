@@ -28,8 +28,11 @@ export default function App() {
               <MovieLibrary navigate={navigate} />
             )}
             
-            {currentPath === "/moviePage" && isAuthenticated && (
-              <MovieDetail navigate={navigate} />
+            {currentPath.startsWith("/movie/") && isAuthenticated && (
+              <MovieDetail 
+                navigate={navigate} 
+                movieId={currentPath.split("/")[2]} 
+              />
             )}
 
             {currentPath === "/profile" && isAuthenticated && (
