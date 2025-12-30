@@ -107,7 +107,7 @@ export default function MovieLibrary({ navigate }) {
 
         {error && <p style={styles.error}>{error}</p>}
 
-        <div style={styles.movieGrid}>
+        <div style={styles.movieGrid} onClick={() => navigate("/moviePage")}>
           {filteredMovies.map((movie) => (
             <div key={movie._id} style={{...styles.movieCard, ...styles.movieCardWrapper}}>
               <button 

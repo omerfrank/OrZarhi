@@ -9,14 +9,12 @@ export const styles = {
     fontFamily: "system-ui, -apple-system, sans-serif",
     overflowX: "hidden", 
   },
-  // Centering wrapper for Login only
   authWrapper: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     minHeight: "calc(100vh - 40px)",
   },
-  // Layout wrapper for Library/Profile
   pageWrapper: {
     maxWidth: "1200px",
     margin: "0 auto",
@@ -59,6 +57,16 @@ export const styles = {
     fontSize: "16px",
     transition: "border-color 0.3s",
     outline: "none",
+  },
+  textarea: {
+    padding: "12px",
+    borderRadius: "8px",
+    border: "2px solid #e0e0e0",
+    fontSize: "16px",
+    transition: "border-color 0.3s",
+    outline: "none",
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    resize: "vertical",
   },
   button: {
     padding: "14px",
@@ -126,7 +134,7 @@ export const styles = {
   },
   movieGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", // Updated to look better
+    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
     gap: "30px",
     width: "100%",
   },
@@ -158,18 +166,6 @@ export const styles = {
     fontSize: "24px",
     transition: "transform 0.2s",
     zIndex: 10,
-  },
-  starButtonHover: {
-    transform: "scale(1.1)",
-  },
-  sectionTitle: {
-    fontSize: "22px",
-    fontWeight: "bold",
-    marginBottom: "20px",
-    color: "#333",
-    marginTop: "30px",
-    borderBottom: "2px solid #eee",
-    paddingBottom: "10px",
   },
   moviePoster: {
     width: "100%",
@@ -291,5 +287,196 @@ export const styles = {
     fontSize: "16px",
     fontWeight: "600",
     cursor: "pointer",
+  },
+  
+  // NEW MOVIE DETAIL STYLES
+  movieHero: {
+    display: "flex",
+    gap: "40px",
+    background: "white",
+    borderRadius: "16px",
+    padding: "40px",
+    marginBottom: "40px",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+    flexWrap: "wrap",
+  },
+  movieDetailPoster: {
+    width: "300px",
+    height: "450px",
+    objectFit: "cover",
+    borderRadius: "12px",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
+  },
+  movieDetailInfo: {
+    flex: 1,
+    minWidth: "300px",
+  },
+  movieDetailTitle: {
+    fontSize: "36px",
+    fontWeight: "bold",
+    margin: "0 0 10px 0",
+    color: "#333",
+  },
+  movieDetailYear: {
+    fontSize: "18px",
+    color: "#888",
+    margin: "0 0 15px 0",
+  },
+  movieDetailDescription: {
+    fontSize: "16px",
+    lineHeight: "1.6",
+    color: "#555",
+    marginTop: "20px",
+  },
+  ratingDisplay: {
+    display: "flex",
+    alignItems: "baseline",
+    gap: "5px",
+    marginTop: "20px",
+  },
+  ratingNumber: {
+    fontSize: "48px",
+    fontWeight: "bold",
+    color: "#667eea",
+  },
+  ratingLabel: {
+    fontSize: "24px",
+    color: "#888",
+  },
+  ratingCount: {
+    fontSize: "16px",
+    color: "#999",
+    marginLeft: "10px",
+  },
+  section: {
+    marginBottom: "40px",
+  },
+  sectionTitle: {
+    fontSize: "28px",
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: "20px",
+    paddingBottom: "10px",
+    borderBottom: "3px solid rgba(255,255,255,0.3)",
+  },
+  castGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+    gap: "20px",
+  },
+  castCard: {
+    background: "white",
+    borderRadius: "12px",
+    overflow: "hidden",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+  },
+  castPhoto: {
+    width: "100%",
+    height: "250px",
+    objectFit: "cover",
+  },
+  castInfo: {
+    padding: "15px",
+  },
+  castName: {
+    fontSize: "16px",
+    fontWeight: "bold",
+    margin: "0 0 5px 0",
+    color: "#333",
+  },
+  castRole: {
+    fontSize: "14px",
+    color: "#888",
+    margin: 0,
+  },
+  relatedGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+    gap: "20px",
+  },
+  relatedCard: {
+    background: "white",
+    borderRadius: "12px",
+    overflow: "hidden",
+    cursor: "pointer",
+    transition: "transform 0.3s",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+  },
+  relatedPoster: {
+    width: "100%",
+    height: "300px",
+    objectFit: "cover",
+  },
+  relatedTitle: {
+    fontSize: "14px",
+    fontWeight: "bold",
+    padding: "10px",
+    margin: 0,
+    color: "#333",
+  },
+  reviewForm: {
+    background: "white",
+    borderRadius: "12px",
+    padding: "20px",
+    marginBottom: "30px",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+  },
+  ratingInput: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+  },
+  slider: {
+    width: "100%",
+    height: "8px",
+    borderRadius: "4px",
+    outline: "none",
+    background: "#e0e0e0",
+  },
+  reviewsList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+  },
+  reviewCard: {
+    background: "white",
+    borderRadius: "12px",
+    padding: "20px",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+  },
+  reviewHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: "15px",
+  },
+  reviewTitle: {
+    fontSize: "18px",
+    fontWeight: "bold",
+    margin: "0 0 5px 0",
+    color: "#333",
+  },
+  reviewAuthor: {
+    fontSize: "14px",
+    color: "#888",
+    margin: 0,
+  },
+  reviewRating: {
+    fontSize: "24px",
+    fontWeight: "bold",
+    color: "#667eea",
+    minWidth: "60px",
+    textAlign: "right",
+  },
+  reviewText: {
+    fontSize: "15px",
+    lineHeight: "1.6",
+    color: "#555",
+    marginBottom: "10px",
+  },
+  reviewDate: {
+    fontSize: "12px",
+    color: "#999",
+    margin: 0,
   },
 };
