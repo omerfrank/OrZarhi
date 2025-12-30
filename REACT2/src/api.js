@@ -42,6 +42,8 @@ export const api = {
     });
     return res.json();
   },
+  
+  // FIXED: This is the critical endpoint
   getMe: async () => {
     const res = await fetch(`${API_BASE}/user/me`, {
       credentials: "include",
@@ -49,15 +51,17 @@ export const api = {
     return res.json();
   },
 
+  // FIXED: Remove userId from body, use session
   addFavorite: async (movieId) => {
     const res = await fetch(`${API_BASE}/user/add-favorite`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ movieId }),
+      body: JSON.stringify({ movieId }), // Removed userId
     });
     return res.json();
   },
+  
   removeFavorite: async (movieId) => {
     const res = await fetch(`${API_BASE}/user/remove-favorite`, {
       method: "DELETE",

@@ -8,11 +8,12 @@ router.post('/register',register);
 router.put('/update', update);
 router.post('/logout', logout);
 
+router.get('/me', getMe);
 router.get('/', getAllUsers);
 router.get('/:id', getUser);
-router.get('/me', getMe);
+
 router.post('/add-favorite', addFavorite);
-router.get('/get-favorites', getFavorites);
+router.get('/favorites/:userId', getFavorites); 
 router.delete('/remove-favorite', removeFavorite);
 
 export default router;
