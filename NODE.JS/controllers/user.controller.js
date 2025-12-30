@@ -1,6 +1,7 @@
 // auth controller
 import express from 'express';
 import User from '../models/user.js';
+import Movie from '../models/movie.js';
 import bcrypt from 'bcrypt';
 import { Vlogin, Vregister, VupdateUser } from '../validations/auth.schema.js';
 
@@ -90,18 +91,20 @@ export async function getUser(req, res) {
 }
 
 export async function getMe(req, res) {
-    console.log(1);
     try {
         const userId = req.session?.userId;
         if (!userId) {
-            console.log(2);
             return res.status(401).json({ success: false, error: "Not authenticated" });
         }
+
         const user = await User.findById(userId).select('-password').populate('favorites');
+        
         if (!user) {
-            console.log(3);
             return res.status(404).json({ success: false, error: "User not found" });
         }
+
+        user.favorites = user.favorites.filter(movie => movie !== null);
+
         return res.status(200).json({ success: true, data: user });
     } catch (error) {
         console.error("Get me error:", error);
@@ -232,6 +235,8 @@ export async function getFavorites(req, res) {
         const user = await User.findById(userId).populate('favorites');
         
         if (!user) return res.status(404).json({ success: false, error: "User not found" });
+
+        user.favorites = user.favorites.filter(movie => movie !== null);
 
         return res.status(200).json({ success: true, data: user.favorites });
     } catch (error) {

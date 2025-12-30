@@ -58,4 +58,13 @@ export const api = {
     });
     return res.json();
   },
+  removeFavorite: async (movieId) => {
+    const res = await fetch(`${API_BASE}/user/remove-favorite`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ movieId }),
+    });
+    return res.json();
+  },
 };
