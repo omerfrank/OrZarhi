@@ -4,6 +4,7 @@ import User from '../models/user.js';
 import Movie from '../models/movie.js';
 import bcrypt from 'bcrypt';
 import { Vlogin, Vregister, VupdateUser } from '../validations/auth.schema.js';
+import jwt from 'jsonwebtoken';
 
 export async function register(req, res) {
     try {
