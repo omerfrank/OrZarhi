@@ -6,7 +6,9 @@ import UserProfile from "./UserProfile.jsx";
 import MovieDetail from "./MovieDetail.jsx"
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    !!localStorage.getItem("token")
+  );
 
   return (
     <Router>
@@ -36,11 +38,14 @@ export default function App() {
             )}
 
             {currentPath === "/profile" && isAuthenticated && (
-              <UserProfile
-                navigate={navigate}
-                onLogout={() => setIsAuthenticated(false)}
-              />
-            )}
+            <UserProfile
+              navigate={navigate}
+              onLogout={() => {
+                localStorage.removeItem("token"); 
+                setIsAuthenticated(false);
+              }}
+            />
+          )}
           </>
         );
       }}
