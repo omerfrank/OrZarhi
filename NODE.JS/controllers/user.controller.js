@@ -60,9 +60,12 @@ export async function login(req, res) {
         const match = await bcrypt.compare(password, UserPtr.password);
 
         if (match) {
-            req.session.userId = UserPtr._id; 
-            req.session.username = UserPtr.username;
-            return res.status(200).json({ success: true, message: 'login true' });
+            const token = jwt.sign(
+                { userId: UserPtr._id, role: UserPtr.role },
+                process.env.JWT_SECRET,
+                { expiresIn: '1d' }
+            );
+            return res.status(200).json({ success: true, token, message: 'login true' });
         } else {
             return res.status(401).json({ success: false, error: 'incorrect' });
         }

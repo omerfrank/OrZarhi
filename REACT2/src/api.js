@@ -4,7 +4,10 @@ export const api = {
   login: async (email, password) => {
     const res = await fetch(`${API_BASE}/user/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem('token')}` 
+                },
       credentials: "include",
       body: JSON.stringify({ email, password }),
     });

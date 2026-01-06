@@ -19,6 +19,11 @@ const userSchema = new mongoose.Schema({
     lastSeen: {
         type: Date
     },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    },
     favorites: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Movies'

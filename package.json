@@ -21,5 +21,8 @@
   "homepage": "https://github.com/omerfrank/OrZarhi#readme",
   "devDependencies": {
     "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.3"
   }
 }
