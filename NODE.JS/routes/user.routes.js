@@ -1,4 +1,5 @@
 import express from 'express';
+import { reqLogin } from '../controllers/auth.controller.js';
 import {register,login,update, logout, getAllUsers, getUser, addFavorite, getFavorites, removeFavorite, getMe } from '../controllers/user.controller.js';
 
 const router = express.Router();
@@ -8,7 +9,7 @@ router.post('/register',register);
 router.put('/update', update);
 router.post('/logout', logout);
 
-router.get('/me', getMe);
+router.get('/me', reqLogin, getMe);
 router.get('/', getAllUsers);
 router.get('/:id', getUser);
 

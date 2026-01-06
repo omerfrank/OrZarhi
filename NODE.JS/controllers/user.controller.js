@@ -96,17 +96,14 @@ export async function getUser(req, res) {
 
 export async function getMe(req, res) {
     try {
-        const userId = req.session?.userId;
-        if (!userId) {
-            return res.status(401).json({ success: false, error: "Not authenticated" });
-        }
+        const user = req.user;
 
-        const user = await User.findById(userId).select('-password').populate('favorites');
-        
         if (!user) {
-            return res.status(404).json({ success: false, error: "User not found" });
+             return res.status(401).json({ success: false, error: "Not authenticated" });
         }
 
+        await user.populate('favorites');
+        
         user.favorites = user.favorites.filter(movie => movie !== null);
 
         return res.status(200).json({ success: true, data: user });

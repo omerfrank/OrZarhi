@@ -66,16 +66,19 @@ export default function UserProfile({ navigate, onLogout }) {
               <div>
                 <h2 style={styles.username}>{user.username}</h2>
                 <p style={styles.email}>{user.email}</p>
+                <p style={{ color: "#666" }}>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
               </div>
             </div>
 
             <div style={styles.profileStats}>
+
               <div style={styles.statItem}>
                 <span style={styles.statValue}>
                   {user.favorites?.length || 0}
                 </span>
                 <span style={styles.statLabel}>Favorites</span>
               </div>
+
               <div style={styles.statItem}>
                 <span style={styles.statValue}>
                   {user.createdAt
@@ -84,6 +87,7 @@ export default function UserProfile({ navigate, onLogout }) {
                 </span>
                 <span style={styles.statLabel}>Member Since</span>
               </div>
+
             </div>
 
             {/* Favorites Section */}
@@ -107,7 +111,7 @@ export default function UserProfile({ navigate, onLogout }) {
                             onError={(e) => e.target.src = "https://via.placeholder.com/50x75"}
                           />
                           <div>
-                            <div style={{ fontWeight: "bold" }}>{movie.title}</div>
+                            <div style={{ fontWeight: "bold", color: "#666" }}>{movie.title}</div>
                             <div style={{ fontSize: "12px", color: "#666" }}>
                               {new Date(movie.releaseDate).getFullYear()}
                             </div>

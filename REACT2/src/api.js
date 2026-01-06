@@ -53,12 +53,20 @@ export const api = {
   },
   
   // FIXED: This is the critical endpoint
-  getMe: async () => {
+getMe: async () => {
+    const token = localStorage.getItem("token"); // Retrieve token
+    
     const res = await fetch(`${API_BASE}/user/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` // Send token in header
+      },
       credentials: "include",
     });
     return res.json();
   },
+  
   // Fetch cast for a specific movie
   getCastByMovie: async (movieId) => {
     const res = await fetch(`${API_BASE}/cast/movie/${movieId}`, {
@@ -66,6 +74,8 @@ export const api = {
     });
     return res.json();
   },
+
+  
 
   // Fetch reviews for a specific movie
   getReviewsByMovie: async (movieId) => {

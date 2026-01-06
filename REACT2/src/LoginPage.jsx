@@ -25,6 +25,7 @@ export default function LoginPage({ onLogin, navigate }) {
           formData.password
         );
         if (result.success) {
+          localStorage.setItem("token", result.token);
           setIsRegistering(false);
           setError("Registration successful! Please login.");
           setFormData({ username: "", email: "", password: "" });
@@ -32,6 +33,7 @@ export default function LoginPage({ onLogin, navigate }) {
       } else {
         result = await api.login(formData.email, formData.password);
         if (result.success) {
+          localStorage.setItem("token", result.token);
           onLogin();
           navigate("/movies");
         }
