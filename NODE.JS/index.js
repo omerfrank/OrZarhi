@@ -1,6 +1,7 @@
 import express from 'express';
-import session from 'express-session'; // Import session
-import MongoStore from 'connect-mongo'; // Import MongoStore
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
+import cookieParser from 'cookie-parser'; // Add this import
 import { connectDB } from './lib/connect.js';
 import handler from './routes/index.js';
 import cors from 'cors';
@@ -10,9 +11,11 @@ const port = 3000;
 
 app.use(cors({
     origin: 'http://localhost:5173', // Your React app URL
-    credentials: true // Required for cookies/sessions to work
+    credentials: true // Required for cookies to work
 }));
+
 app.use(express.json());
+app.use(cookieParser()); // Add cookie parser middleware
 
 app.use(session({
     secret: 'zivIsTheZiviestOfaLLL123!!&',
@@ -22,9 +25,10 @@ app.use(session({
         mongoUrl: process.env.DATABASE_URL
     }),
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24, // 1 day
+        maxAge: 1000 * 60 * 60 * 24, 
         httpOnly: true,
-        secure: false // Set to true if using HTTPS
+        secure: false, 
+        sameSite: 'lax'
     }
 }));
 

@@ -5,9 +5,8 @@ export const api = {
     const res = await fetch(`${API_BASE}/user/login`, {
       method: "POST",
       headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem('token')}` 
-                },
+        "Content-Type": "application/json"
+      },
       credentials: "include",
       body: JSON.stringify({ email, password }),
     });
@@ -38,6 +37,7 @@ export const api = {
     });
     return res.json();
   },
+  
   getMovie: async (id) => {
     const res = await fetch(`${API_BASE}/movie/${id}`, {
       credentials: "include",
@@ -52,22 +52,18 @@ export const api = {
     return res.json();
   },
   
-  // FIXED: This is the critical endpoint
-getMe: async () => {
-    const token = localStorage.getItem("token"); // Retrieve token
-    
+  // Cookie is automatically sent with credentials: "include"
+  getMe: async () => {
     const res = await fetch(`${API_BASE}/user/me`, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}` // Send token in header
+        "Content-Type": "application/json"
       },
-      credentials: "include",
+      credentials: "include", // Browser automatically sends the cookie
     });
     return res.json();
   },
   
-  // Fetch cast for a specific movie
   getCastByMovie: async (movieId) => {
     const res = await fetch(`${API_BASE}/cast/movie/${movieId}`, {
       credentials: "include",
@@ -75,9 +71,6 @@ getMe: async () => {
     return res.json();
   },
 
-  
-
-  // Fetch reviews for a specific movie
   getReviewsByMovie: async (movieId) => {
     const res = await fetch(`${API_BASE}/review/movie/${movieId}`, {
       credentials: "include",
@@ -85,7 +78,6 @@ getMe: async () => {
     return res.json();
   },
   
-  // You also need this for the review form submission
   addReview: async (reviewData) => {
     const res = await fetch(`${API_BASE}/review`, {
       method: "POST",
@@ -96,13 +88,12 @@ getMe: async () => {
     return res.json();
   },
 
-  // FIXED: Remove userId from body, use session
   addFavorite: async (movieId) => {
     const res = await fetch(`${API_BASE}/user/add-favorite`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ movieId }), // Removed userId
+      body: JSON.stringify({ movieId }),
     });
     return res.json();
   },

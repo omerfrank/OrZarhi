@@ -5,13 +5,12 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function reqLogin(req, res, next) {
     try {
-        const authHeader = req.headers.authorization;
+        // Read token from cookie instead of Authorization header
+        const token = req.cookies.token;
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        if (!token) {
             return res.status(401).json({ success: false, error: 'Access denied. No token provided.' });
         }
-
-        const token = authHeader.split(' ')[1];
 
         // Verify the token
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -38,7 +37,6 @@ export async function reqLogin(req, res, next) {
  */
 export function reqAdmin(req, res, next) {
     // Check if user is authenticated and has admin role
-    // Note: You will need to add a 'role' or 'isAdmin' field to your User model
     if (!req.user || req.user.role !== 'admin') {
         return res.status(403).json({ success: false, error: 'Access denied. Admin privileges required.' });
     }

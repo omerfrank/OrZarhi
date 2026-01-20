@@ -16,7 +16,6 @@ export async function register(req, res) {
             return res.status(400).json({ success: false, error: errorMsg });
         }
 
-        // Fix 1: Destructure 'username' to match the User model schema
         const { username, email, password } = req.body;
         
         const emailExist = await User.findOne({ email });
@@ -26,7 +25,6 @@ export async function register(req, res) {
 
         const passwordhash = await bcrypt.hash(password, 10);        
         
-        // Fix 2: Create user with correct 'username' field
         const user = await User.create({ username, email, password: passwordhash });
         
         if (!user){
@@ -57,7 +55,6 @@ export async function login(req, res) {
             return res.status(401).json({ success: false, error: 'incorrect' });
         }
 
-        // Fix 3: Use await instead of callback to prevent request hanging
         const match = await bcrypt.compare(password, UserPtr.password);
 
         if (match) {
@@ -66,7 +63,27 @@ export async function login(req, res) {
                 process.env.JWT_SECRET,
                 { expiresIn: '1d' }
             );
-            return res.status(200).json({ success: true, token, message: 'login true' });
+            
+            // Set JWT token as HttpOnly cookie
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: false, // Set to true in production with HTTPS
+                sameSite: 'lax',
+                maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            });
+            
+            // Also set session
+            req.session.userId = UserPtr._id;
+            
+            return res.status(200).json({ 
+                success: true, 
+                message: 'login true',
+                user: { 
+                    id: UserPtr._id, 
+                    username: UserPtr.username, 
+                    email: UserPtr.email 
+                }
+            });
         } else {
             return res.status(401).json({ success: false, error: 'incorrect' });
         }
@@ -76,11 +93,11 @@ export async function login(req, res) {
         return res.status(500).json({ success: false, error: 'internal error' });
     }
 }
+
 // Get a specific user by ID: GET /api/auth/:id
 export async function getUser(req, res) {
     try {
         const { id } = req.params;
-        // Find user by ID and exclude the password field
         const user = await User.findById(id).select('-password').populate('favorites');
         
         if (!user) {
@@ -116,7 +133,6 @@ export async function getMe(req, res) {
 // Get all users: GET /api/auth/
 export async function getAllUsers(req, res) {
     try {
-        // Fetch all users and exclude their passwords
         const users = await User.find({}).select('-password');
         return res.status(200).json({ success: true, count: users.length, data: users });
     } catch (error) {
@@ -124,6 +140,7 @@ export async function getAllUsers(req, res) {
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }
+
 export async function update(req, res) {
     try {
         // 1. Authenticate
@@ -133,7 +150,6 @@ export async function update(req, res) {
         }
 
         // 2. Validate
-        // .safeParse handles "optional" correctly (ignores missing fields)
         const parsed = VupdateUser.safeParse(req.body);
         if (!parsed.success) {
             const issues = parsed.error.issues || [];
@@ -145,9 +161,7 @@ export async function update(req, res) {
         const updates = {};
 
         // 3. Check for Email Update
-        // "if (email)" is true only if email is a non-empty string
         if (email) {
-            // Check uniqueness against OTHER users
             const emailExists = await User.findOne({ email, _id: { $ne: userId } });
             if (emailExists) {
                 return res.status(409).json({ success: false, error: 'Email already in use' });
@@ -186,11 +200,15 @@ export async function update(req, res) {
 }
 
 export function logout(req, res) {
+    // Clear the JWT token cookie
+    res.clearCookie('token');
+    
+    // Destroy the session
     req.session.destroy((err) => {
         if (err) {
             return res.status(500).json({ success: false, error: "Logout failed" });
         }
-        res.clearCookie('connect.sid'); // clear the cookie
+        res.clearCookie('connect.sid'); // Clear the session cookie
         return res.status(200).json({ success: true, message: "Logged out" });
     });
 }
@@ -209,7 +227,7 @@ export async function addFavorite(req, res) {
 
         const user = await User.findByIdAndUpdate(
             targetUserId,
-            { $addToSet: { favorites: movieId } }, // addToSet prevents duplicates
+            { $addToSet: { favorites: movieId } },
             { new: true }
         ).select('favorites');
 
@@ -250,14 +268,14 @@ export async function getFavorites(req, res) {
 export async function removeFavorite(req, res) {
     try {
         const { movieId } = req.body; 
-        const userId = req.session?.userId; // Assuming removal is for the logged-in user
+        const userId = req.session?.userId;
 
         if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
         if (!movieId) return res.status(400).json({ success: false, error: "MovieId is required" });
 
         const user = await User.findByIdAndUpdate(
             userId,
-            { $pull: { favorites: movieId } }, // $pull removes the item from the array
+            { $pull: { favorites: movieId } },
             { new: true }
         ).select('favorites');
 
