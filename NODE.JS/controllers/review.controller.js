@@ -11,7 +11,7 @@ export async function addReview(req, res) {
         if (!userID || !movieID || !rating || !title) {
             return res.status(400).json({ 
                 success: false, 
-                error: "UserID, MovieID, rating, and title are required" 
+                error: "UserID, MovieID, rating, and title are required"
             });
         }
 

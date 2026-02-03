@@ -85,7 +85,6 @@ getMe: async () => {
     return res.json();
   },
   
-  // You also need this for the review form submission
   addReview: async (reviewData) => {
     const res = await fetch(`${API_BASE}/review`, {
       method: "POST",
