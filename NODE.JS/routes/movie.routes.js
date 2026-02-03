@@ -4,7 +4,7 @@ import { addMovie, getMovie, getAllMovies } from '../controllers/movie.controlle
 
 const router = express.Router();
 
-// GET /api/movies - Get all movies (supports ?genre=Action)
+// GET /api/movie - Get all movies (supports ?genre=Action)
 router.get('/', reqLogin, getAllMovies);
 
 // GET /api/movies/:id - Get a specific movie by ID

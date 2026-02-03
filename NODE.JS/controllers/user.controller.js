@@ -61,6 +61,7 @@ export async function login(req, res) {
         const match = await bcrypt.compare(password, UserPtr.password);
 
         if (match) {
+            req.session.userId = UserPtr._id;
             const token = jwt.sign(
                 { userId: UserPtr._id, role: UserPtr.role },
                 process.env.JWT_SECRET,

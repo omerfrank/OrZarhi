@@ -15,7 +15,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use(session({
-    secret: 'zivIsTheZiviestOfaLLL123!!&',
+    secret: process.env.JWT_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
