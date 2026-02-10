@@ -1,6 +1,6 @@
 import express from 'express';
 import { reqLogin, reqAdmin } from '../middleware/middleware.auth.js';
-import { getReview, getAllReviews, updateReview, addReview } from '../controllers/review.controller.js';
+import { getReview, getAllReviews, updateReview, addReview, deleteReview } from '../controllers/review.controller.js';
 
 const router = express.Router();
 
@@ -13,6 +13,10 @@ router.get('/movie/:movieId', reqLogin, getAllReviews);
 // Update review
 router.put('/:id', reqLogin, updateReview);
 
+// add
 router.post('/', reqLogin, addReview);
+
+// deel
+router.delete('/:id', reqLogin, deleteReview);
 
 export default router;

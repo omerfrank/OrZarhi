@@ -1,7 +1,6 @@
 import express from 'express';
 import { reqLogin, reqAdmin } from '../middleware/middleware.auth.js';
-import { addMovie, getMovie, getAllMovies } from '../controllers/movie.controller.js';
-
+import { addMovie, getMovie, getAllMovies, deleteMovie } from '../controllers/movie.controller.js';
 const router = express.Router();
 
 // GET /api/movie - Get all movies (supports ?genre=Action)
@@ -13,4 +12,6 @@ router.get('/:id', reqLogin, getMovie);
 // POST /api/movies - Add a new movie
 router.post('/', reqAdmin, addMovie);
 
+// DEL del
+router.delete('/:id', reqAdmin, deleteMovie);
 export default router;

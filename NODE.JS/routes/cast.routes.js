@@ -1,11 +1,6 @@
 import express from 'express';
-<<<<<<< HEAD
-import { getCastById, getCastByMovieId, createCast, deleteCast } from '../controllers/cast.controller.js';
-import {} from '../'
-=======
 import { reqLogin, reqAdmin } from '../middleware/middleware.auth.js';
 import { getCastById, getCastByMovieId, createCast } from '../controllers/cast.controller.js';
->>>>>>> 31ef2550ce7fd1851d8727ebb991e1a95704afa3
 
 const router = express.Router();
 

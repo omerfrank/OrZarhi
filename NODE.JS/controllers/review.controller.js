@@ -108,3 +108,32 @@ export async function updateReview(req, res) {
         return res.status(500).json({ success: false, error: "Internal server error" });
     }
 }
+
+// Delete a review: DELETE /api/reviews/:id
+export async function deleteReview(req, res) {
+    try {
+        const { id } = req.params;
+        const userId = req.session?.userId;
+
+        // Find the review to check ownership
+        const review = await Review.findById(id);
+
+        if (!review) {
+            return res.status(404).json({ success: false, error: "Review not found" });
+        }
+
+        // Security check: Ensure only the owner can delete
+        if (userId && review.userID.toString() !== userId) {
+            return res.status(403).json({ success: false, error: "Unauthorized to delete this review" });
+        }
+
+        // Delete the review
+        await Review.findByIdAndDelete(id);
+
+        return res.status(200).json({ success: true, message: "Review deleted successfully" });
+
+    } catch (error) {
+        console.error("Delete review error:", error);
+        return res.status(500).json({ success: false, error: "Internal server error" });
+    }
+}

@@ -1,6 +1,6 @@
 import Movie from '../models/movie.js';
 import { VaddMovie } from '../validations/movie.schema.js';
-
+import Review from '../models/review.js';
 export async function addMovie(req, res) {
     try {
         // Validate Input
@@ -58,6 +58,31 @@ export async function getAllMovies(req, res) {
 
     } catch (error) {
         console.error('Get All Movies Error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+}
+export async function deleteMovie(req, res) {
+    try {
+        const { id } = req.params;
+
+        // Find and delete the movie
+        const deletedMovie = await Movie.findByIdAndDelete(id);
+
+        // Handle case where movie doesn't exist
+        if (!deletedMovie) {
+            return res.status(404).json({ success: false, error: 'Movie not found' });
+        }
+
+        // Clean up related data: Delete all reviews associated with this movie
+        await Review.deleteMany({ movieID: id });
+
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Movie and associated reviews deleted successfully' 
+        });
+
+    } catch (error) {
+        console.error('Delete Movie Error:', error);
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }
