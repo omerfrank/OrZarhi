@@ -11,7 +11,7 @@ export default function MovieDetail({ navigate, movieId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null); // <--- ADDED THIS
+  const [currentUser, setCurrentUser] = useState(null);
   
   // Review form state
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -72,7 +72,7 @@ export default function MovieDetail({ navigate, movieId }) {
       if (castRes.success) setCast(castRes.data);
       if (reviewsRes.success) setReviews(reviewsRes.data);
       if (userRes.success) {
-        setCurrentUser(userRes.data); // <--- ADDED THIS
+        setCurrentUser(userRes.data);
         const favIds = new Set(userRes.data.favorites.map(f => f._id || f));
         setIsFavorite(favIds.has(movieId));
         if (userRes.data.role === 'admin') setIsAdmin(true);
@@ -118,7 +118,7 @@ export default function MovieDetail({ navigate, movieId }) {
   };
 
   const handleDeleteReview = async (reviewId) => {
-    if (!window.confirm("Are you sure you want to delete your review?")) return;
+    if (!window.confirm("Are you sure you want to delete this review?")) return;
     try {
       const result = await api.deleteReview(reviewId);
       if (result.success) {
@@ -306,7 +306,7 @@ export default function MovieDetail({ navigate, movieId }) {
                     </div>
                     <div style={{display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "5px"}}>
                         <div style={styles.reviewRating}>{review.rating}/10</div>
-                        {currentUser && review.userID && (review.userID._id === currentUser._id) && (
+                        {currentUser && review.userID && (review.userID._id === currentUser._id || isAdmin) && (
                             <button 
                                 onClick={() => handleDeleteReview(review._id)}
                                 style={{

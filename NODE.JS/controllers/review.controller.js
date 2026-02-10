@@ -1,4 +1,5 @@
 import Review from '../models/review.js';
+import User from '../models/user.js';
 
 // Create a new review: POST /api/reviews/
 export async function addReview(req, res) {
@@ -115,15 +116,25 @@ export async function deleteReview(req, res) {
         const { id } = req.params;
         const userId = req.session?.userId;
 
-        // Find the review to check ownership
-        const review = await Review.findById(id);
+        if (!userId) {
+             return res.status(401).json({ success: false, error: "Unauthorized" });
+        }
+
+        // Fetch review and user in parallel
+        const [review, requestingUser] = await Promise.all([
+            Review.findById(id),
+            User.findById(userId)
+        ]);
 
         if (!review) {
             return res.status(404).json({ success: false, error: "Review not found" });
         }
 
-        // Security check: Ensure only the owner can delete
-        if (userId && review.userID.toString() !== userId) {
+        // Security check: Ensure owner OR admin
+        const isOwner = review.userID.toString() === userId;
+        const isAdmin = requestingUser && requestingUser.role === 'admin';
+
+        if (!isOwner && !isAdmin) {
             return res.status(403).json({ success: false, error: "Unauthorized to delete this review" });
         }
 
