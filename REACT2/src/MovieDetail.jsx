@@ -10,6 +10,7 @@ export default function MovieDetail({ navigate, movieId }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   
   // Review form state
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -17,6 +18,16 @@ export default function MovieDetail({ navigate, movieId }) {
     title: "",
     rating: 5,
     text: ""
+  });
+
+  // Cast Modal State
+  const [showCastModal, setShowCastModal] = useState(false);
+  const [newCast, setNewCast] = useState({
+    name: "",
+    bio: "",
+    role: "", // Character Name
+    photoURL: "",
+    birthDay: ""
   });
 
   useEffect(() => {
@@ -57,6 +68,9 @@ export default function MovieDetail({ navigate, movieId }) {
       if (userRes.success) {
         const favIds = new Set(userRes.data.favorites.map(f => f._id || f));
         setIsFavorite(favIds.has(movieId));
+        if (userRes.data.role === 'admin') {
+            setIsAdmin(true);
+        }
       }
 
     } catch (err) {
@@ -104,6 +118,45 @@ export default function MovieDetail({ navigate, movieId }) {
       }
     } catch (err) {
       console.error("Failed to submit review", err);
+    }
+  };
+
+  const handleAddCast = async () => {
+    if (!newCast.name || !newCast.role || !newCast.birthDay) {
+        alert("Please fill in required fields (Name, Role, Birthday)");
+        return;
+    }
+
+    try {
+        const res = await api.addCast(newCast);
+        if (res.success) {
+            // Note: Since the backend doesn't automatically link this new cast member to the current movie
+            // we can't display them in the list immediately unless we had an 'addCastToMovie' endpoint.
+            // For now, we confirm creation.
+            alert("Cast member created! (Note: They may not appear here until linked)");
+            setShowCastModal(false);
+            setNewCast({ name: "", bio: "", role: "", photoURL: "", birthDay: "" });
+        } else {
+            alert(res.error || "Failed to add cast");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error adding cast");
+    }
+  };
+
+  const handleDeleteCast = async (id) => {
+    if (!window.confirm("Delete this cast member? This removes them from all movies.")) return;
+    try {
+        const res = await api.deleteCast(id);
+        if (res.success) {
+            setCast(cast.filter(c => c._id !== id));
+        } else {
+            alert(res.error || "Failed to delete cast");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error deleting cast");
     }
   };
 
@@ -190,29 +243,62 @@ export default function MovieDetail({ navigate, movieId }) {
         </div>
 
         {/* Cast Section */}
-        {cast.length > 0 && (
-          <div style={styles.section}>
-            <h2 style={styles.sectionTitle}>Cast</h2>
-            <div style={styles.castGrid}>
-              {cast.map((member) => (
-                <div key={member._id} style={styles.castCard}>
-                  <img
-                    src={member.photoURL}
-                    alt={member.name}
-                    style={styles.castPhoto}
-                    onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/200x250?text=No+Photo";
-                    }}
-                  />
-                  <div style={styles.castInfo}>
-                    <h3 style={styles.castName}>{member.name}</h3>
-                    <p style={styles.castRole}>{member.role}</p>
-                  </div>
-                </div>
-              ))}
+        <div style={styles.section}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h2 style={styles.sectionTitle}>Cast</h2>
+                {isAdmin && (
+                    <button onClick={() => setShowCastModal(true)} style={styles.linkButton}>
+                        + Add Cast Member
+                    </button>
+                )}
             </div>
-          </div>
-        )}
+            
+            {cast.length > 0 ? (
+                <div style={styles.castGrid}>
+                {cast.map((member) => (
+                    <div key={member._id} style={{...styles.castCard, position: "relative"}}>
+                        {isAdmin && (
+                            <button 
+                                onClick={() => handleDeleteCast(member._id)}
+                                style={{
+                                    position: "absolute",
+                                    top: 0,
+                                    right: 0,
+                                    background: styles.danger,
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "50%",
+                                    width: "24px",
+                                    height: "24px",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "12px"
+                                }}
+                            >
+                                ✕
+                            </button>
+                        )}
+                        <img
+                            src={member.photoURL}
+                            alt={member.name}
+                            style={styles.castPhoto}
+                            onError={(e) => {
+                            e.target.src = "https://via.placeholder.com/200x250?text=No+Photo";
+                            }}
+                        />
+                        <div style={styles.castInfo}>
+                            <h3 style={styles.castName}>{member.name}</h3>
+                            <p style={styles.castRole}>{member.role}</p>
+                        </div>
+                    </div>
+                ))}
+                </div>
+            ) : (
+                <p style={{color: styles.textSecondary}}>No cast info available.</p>
+            )}
+        </div>
 
         {/* Related Movies */}
         {relatedMovies.length > 0 && (
@@ -314,6 +400,63 @@ export default function MovieDetail({ navigate, movieId }) {
             <p style={styles.noResults}>No reviews yet. Be the first to review!</p>
           )}
         </div>
+
+        {/* Add Cast Modal */}
+        {showCastModal && (
+            <div style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(0,0,0,0.8)",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                zIndex: 1000
+            }}>
+                <div style={{...styles.card, maxWidth: "500px", position: "relative"}}>
+                    <h2 style={styles.title}>Add New Cast Member</h2>
+                    <div style={styles.form}>
+                        <input 
+                            style={styles.input} 
+                            placeholder="Name" 
+                            value={newCast.name}
+                            onChange={e => setNewCast({...newCast, name: e.target.value})}
+                        />
+                        <input 
+                            style={styles.input} 
+                            placeholder="Role (e.g. Neo)" 
+                            value={newCast.role}
+                            onChange={e => setNewCast({...newCast, role: e.target.value})}
+                        />
+                         <input 
+                            style={styles.input} 
+                            type="date"
+                            placeholder="Birthday" 
+                            value={newCast.birthDay}
+                            onChange={e => setNewCast({...newCast, birthDay: e.target.value})}
+                        />
+                        <input 
+                            style={styles.input} 
+                            placeholder="Photo URL" 
+                            value={newCast.photoURL}
+                            onChange={e => setNewCast({...newCast, photoURL: e.target.value})}
+                        />
+                        <textarea 
+                            style={styles.textarea} 
+                            placeholder="Bio" 
+                            value={newCast.bio}
+                            onChange={e => setNewCast({...newCast, bio: e.target.value})}
+                        />
+                        <div style={{display: "flex", gap: "10px", marginTop: "10px"}}>
+                            <button onClick={handleAddCast} style={{...styles.button, flex: 1}}>Create</button>
+                            <button onClick={() => setShowCastModal(false)} style={{...styles.linkButton, flex: 1, borderColor: styles.textSecondary, color: styles.textSecondary}}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
       </div>
     </div>
   );

@@ -45,6 +45,24 @@ export const api = {
     return res.json();
   },
 
+  addMovie: async (movieData) => {
+    const res = await fetch(`${API_BASE}/movie`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(movieData),
+    });
+    return res.json();
+  },
+
+  deleteMovie: async (id) => {
+    const res = await fetch(`${API_BASE}/movie/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    return res.json();
+  },
+
   getUser: async (userId) => {
     const res = await fetch(`${API_BASE}/user/${userId}`, {
       credentials: "include",
@@ -66,6 +84,24 @@ export const api = {
   
   getCastByMovie: async (movieId) => {
     const res = await fetch(`${API_BASE}/cast/movie/${movieId}`, {
+      credentials: "include",
+    });
+    return res.json();
+  },
+
+  addCast: async (castData) => {
+    const res = await fetch(`${API_BASE}/cast`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(castData),
+    });
+    return res.json();
+  },
+
+  deleteCast: async (id) => {
+    const res = await fetch(`${API_BASE}/cast/${id}`, {
+      method: "DELETE",
       credentials: "include",
     });
     return res.json();
