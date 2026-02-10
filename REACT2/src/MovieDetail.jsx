@@ -11,6 +11,7 @@ export default function MovieDetail({ navigate, movieId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null); // <--- ADDED THIS
   
   // Review form state
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -71,6 +72,7 @@ export default function MovieDetail({ navigate, movieId }) {
       if (castRes.success) setCast(castRes.data);
       if (reviewsRes.success) setReviews(reviewsRes.data);
       if (userRes.success) {
+        setCurrentUser(userRes.data); // <--- ADDED THIS
         const favIds = new Set(userRes.data.favorites.map(f => f._id || f));
         setIsFavorite(favIds.has(movieId));
         if (userRes.data.role === 'admin') setIsAdmin(true);
@@ -109,8 +111,25 @@ export default function MovieDetail({ navigate, movieId }) {
         setReviews([result.data, ...reviews]);
         setReviewForm({ title: "", rating: 5, text: "" });
         setShowReviewForm(false);
+        // Refresh to ensure user details are populated correctly if needed
+        loadMovieDetails();
       }
     } catch (err) { console.error("Failed to submit review", err); }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm("Are you sure you want to delete your review?")) return;
+    try {
+      const result = await api.deleteReview(reviewId);
+      if (result.success) {
+        setReviews(reviews.filter(r => r._id !== reviewId));
+      } else {
+        alert(result.error || "Failed to delete review");
+      }
+    } catch (err) {
+      console.error("Failed to delete review", err);
+      alert("Error deleting review");
+    }
   };
 
   const handleAddCast = async () => {
@@ -280,11 +299,30 @@ export default function MovieDetail({ navigate, movieId }) {
             {reviews.map((review) => (
               <div key={review._id} style={styles.reviewCard}>
                 <div style={styles.reviewHeader}>
-                  <div>
-                    <h3 style={styles.reviewTitle}>{review.title}</h3>
-                    <p style={styles.reviewAuthor}>by {review.userID?.username || "Anonymous"}</p>
+                  <div style={{display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%"}}>
+                    <div>
+                        <h3 style={styles.reviewTitle}>{review.title}</h3>
+                        <p style={styles.reviewAuthor}>by {review.userID?.username || "Anonymous"}</p>
+                    </div>
+                    <div style={{display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "5px"}}>
+                        <div style={styles.reviewRating}>{review.rating}/10</div>
+                        {currentUser && review.userID && (review.userID._id === currentUser._id) && (
+                            <button 
+                                onClick={() => handleDeleteReview(review._id)}
+                                style={{
+                                    fontSize: "12px", 
+                                    color: styles.danger, 
+                                    background: "none", 
+                                    border: "none", 
+                                    cursor: "pointer", 
+                                    textDecoration: "underline"
+                                }}
+                            >
+                                Delete
+                            </button>
+                        )}
+                    </div>
                   </div>
-                  <div style={styles.reviewRating}>{review.rating}/10</div>
                 </div>
                 {review.text && <p style={styles.reviewText}>{review.text}</p>}
                 <p style={styles.reviewDate}>{new Date(review.createdAt).toLocaleDateString()}</p>

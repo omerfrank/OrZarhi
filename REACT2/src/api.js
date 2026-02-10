@@ -128,7 +128,13 @@ export const api = {
     });
     return res.json();
   },
-
+  deleteReview: async (id) => {
+    const res = await fetch(`${API_BASE}/review/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    return res.json();
+  },
   addFavorite: async (movieId) => {
     const res = await fetch(`${API_BASE}/user/add-favorite`, {
       method: "POST",
