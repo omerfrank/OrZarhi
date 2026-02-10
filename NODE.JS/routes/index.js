@@ -6,10 +6,6 @@ import CastHandler from './cast.routes.js';
 import ReviewHandler from './review.routes.js';
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  res.send('api works?');
-});
-
 router.use('/user',UserHandler) 
 router.use('/react', ReactHandler)
 router.use('/movie', MovieHandler)

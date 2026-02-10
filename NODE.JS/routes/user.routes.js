@@ -1,20 +1,20 @@
 import express from 'express';
-import { reqLogin } from '../controllers/auth.controller.js';
+import { reqLogin, reqAdmin } from '../middleware/middleware.auth.js';
 import {register,login,update, logout, getAllUsers, getUser, addFavorite, getFavorites, removeFavorite, getMe } from '../controllers/user.controller.js';
 
 const router = express.Router();
 
 router.post('/login',login);
-router.post('/register',register);
-router.put('/update', update);
-router.post('/logout', logout);
+router.post('/register', register);
+router.put('/update', reqLogin, update);
+router.post('/logout', reqLogin, logout);
 
 router.get('/me', reqLogin, getMe);
-router.get('/', getAllUsers);
-router.get('/:id', getUser);
+router.get('/', reqAdmin, getAllUsers);
+router.get('/:id', reqLogin, getUser);
 
-router.post('/add-favorite', addFavorite);
-router.get('/favorites/:userId', getFavorites); 
-router.delete('/remove-favorite', removeFavorite);
+router.post('/add-favorite', reqLogin, addFavorite);
+router.get('/favorites/:userId', reqLogin, getFavorites); 
+router.delete('/remove-favorite', reqLogin, removeFavorite);
 
 export default router;

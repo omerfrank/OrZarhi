@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(cookieParser()); // Add cookie parser middleware
 
 app.use(session({
-    secret: 'zivIsTheZiviestOfaLLL123!!&',
+    secret: process.env.JWT_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
