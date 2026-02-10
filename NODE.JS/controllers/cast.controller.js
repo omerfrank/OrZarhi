@@ -42,7 +42,22 @@ export async function getCastByMovieId(req, res) {
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }
+export async function getAllCast(req, res) {
+    try {
+        const { name } = req.query;
+        const filter = {};
+        
+        if (name) {
+            filter.name = { $regex: name, $options: 'i' };
+        }
 
+        const cast = await Cast.find(filter).sort({ name: 1 });
+        return res.status(200).json({ success: true, count: cast.length, data: cast });
+    } catch (error) {
+        console.error("Error fetching all cast:", error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+}
 export async function createCast(req, res) {
     try {
 

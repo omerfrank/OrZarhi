@@ -86,3 +86,30 @@ export async function deleteMovie(req, res) {
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }
+export async function addCastToMovie(req, res) {
+    try {
+        const { id } = req.params; // Movie ID
+        const { castId } = req.body; // Cast Member ID
+
+        if (!castId) {
+            return res.status(400).json({ success: false, error: 'Cast ID is required' });
+        }
+
+        // Use $addToSet to prevent duplicate entries of the same actor
+        const movie = await Movie.findByIdAndUpdate(
+            id,
+            { $addToSet: { cast: castId } },
+            { new: true }
+        ).populate('cast');
+
+        if (!movie) {
+            return res.status(404).json({ success: false, error: 'Movie not found' });
+        }
+
+        return res.status(200).json({ success: true, message: 'Cast linked to movie', data: movie });
+
+    } catch (error) {
+        console.error('Link Cast Error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+}

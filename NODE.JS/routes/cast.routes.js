@@ -1,6 +1,6 @@
 import express from 'express';
 import { reqLogin, reqAdmin } from '../middleware/middleware.auth.js';
-import { getCastById, getCastByMovieId, createCast, deleteCast } from '../controllers/cast.controller.js';
+import { getCastById, getCastByMovieId, createCast, deleteCast,getAllCast } from '../controllers/cast.controller.js';
 
 const router = express.Router();
 
@@ -11,9 +11,11 @@ router.get('/:id', reqLogin, getCastById);
 router.get('/movie/:id', reqLogin, getCastByMovieId);
 
 // Add a new cast member
-router.post('/', reqAdmin, createCast);
+router.post('/', reqLogin, reqAdmin, createCast);
 
 // delete cast by id
-router.delete('/:id', reqAdmin, deleteCast);
+router.delete('/:id', reqLogin, reqAdmin, deleteCast);
+
+router.get('/', reqLogin, getAllCast);
 
 export default router;

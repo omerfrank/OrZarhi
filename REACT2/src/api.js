@@ -88,7 +88,12 @@ export const api = {
     });
     return res.json();
   },
-
+  getAllCast: async () => {
+    const res = await fetch(`${API_BASE}/cast`, {
+      credentials: "include",
+    });
+    return res.json();
+  },
   addCast: async (castData) => {
     const res = await fetch(`${API_BASE}/cast`, {
       method: "POST",
@@ -143,4 +148,13 @@ export const api = {
     });
     return res.json();
   },
+  linkCastToMovie: async (movieId, castId) => {
+    const res = await fetch(`${API_BASE}/movie/${movieId}/cast`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ castId }),
+    });
+    return res.json();
+  }
 };

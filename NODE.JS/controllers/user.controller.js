@@ -99,6 +99,11 @@ export async function login(req, res) {
 export async function getUser(req, res) {
     try {
         const { id } = req.params;
+        // Find user by ID and exclude the password field
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ success: false, error: 'Invalid ID format' });
+        }
+
         const user = await User.findById(id).select('-password').populate('favorites');
         
         if (!user) {
@@ -111,7 +116,6 @@ export async function getUser(req, res) {
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }
-
 export async function getMe(req, res) {
     try {
         const user = req.user;

@@ -10,7 +10,7 @@ router.put('/update', reqLogin, update);
 router.post('/logout', reqLogin, logout);
 
 router.get('/me', reqLogin, getMe);
-router.get('/', reqAdmin, getAllUsers);
+router.get('/', reqLogin, reqAdmin, getAllUsers);
 router.get('/:id', reqLogin, getUser);
 
 router.post('/add-favorite', reqLogin, addFavorite);
