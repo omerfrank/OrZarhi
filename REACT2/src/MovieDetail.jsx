@@ -16,6 +16,7 @@ export default function MovieDetail({ navigate, movieId }) {
   // Review form state
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ title: "", rating: 5, text: "" });
+  const [hoverRating, setHoverRating] = useState(0); // For star hover effect
 
   // Cast Creation Modal State
   const [showCastModal, setShowCastModal] = useState(false);
@@ -111,7 +112,7 @@ export default function MovieDetail({ navigate, movieId }) {
         setReviews([result.data, ...reviews]);
         setReviewForm({ title: "", rating: 5, text: "" });
         setShowReviewForm(false);
-        // Refresh to ensure user details are populated correctly if needed
+        // Reload details to get the populated user info for the new review
         loadMovieDetails();
       }
     } catch (err) { console.error("Failed to submit review", err); }
@@ -282,19 +283,75 @@ export default function MovieDetail({ navigate, movieId }) {
         <div style={styles.section}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h2 style={styles.sectionTitle}>Reviews ({reviews.length})</h2>
-            <button onClick={() => setShowReviewForm(!showReviewForm)} style={styles.linkButton}>{showReviewForm ? "Cancel" : "Write Review"}</button>
+            {!showReviewForm && (
+              <button onClick={() => setShowReviewForm(true)} style={styles.linkButton}>+ Write Review</button>
+            )}
           </div>
+          
           {showReviewForm && (
             <div style={styles.reviewForm}>
-              <input type="text" placeholder="Review title" value={reviewForm.title} onChange={(e) => setReviewForm({...reviewForm, title: e.target.value})} style={styles.input} />
-              <div style={styles.ratingInput}>
-                <label style={styles.label}>Rating: {reviewForm.rating}/10</label>
-                <input type="range" min="1" max="10" value={reviewForm.rating} onChange={(e) => setReviewForm({...reviewForm, rating: parseInt(e.target.value)})} style={styles.slider} />
+              <div>
+                <label style={styles.formLabel}>Review Title</label>
+                <input 
+                  type="text" 
+                  placeholder="Headline for your review" 
+                  value={reviewForm.title} 
+                  onChange={(e) => setReviewForm({...reviewForm, title: e.target.value})} 
+                  style={{...styles.input, width: "100%", boxSizing: "border-box"}} 
+                />
               </div>
-              <textarea placeholder="Write your review..." value={reviewForm.text} onChange={(e) => setReviewForm({...reviewForm, text: e.target.value})} style={styles.textarea} rows="4" />
-              <button onClick={handleSubmitReview} style={styles.button}>Submit Review</button>
+              
+              <div>
+                <label style={styles.formLabel}>Your Rating: <span style={{color: styles.accentColor}}>{reviewForm.rating}/10</span></label>
+                <div style={styles.starContainer} onMouseLeave={() => setHoverRating(0)}>
+                  {[...Array(10)].map((_, i) => {
+                    const ratingValue = i + 1;
+                    return (
+                      <span 
+                        key={i} 
+                        style={{
+                          ...styles.starIcon, 
+                          color: ratingValue <= (hoverRating || reviewForm.rating) ? styles.accentColor : "#444"
+                        }}
+                        onClick={() => setReviewForm({...reviewForm, rating: ratingValue})}
+                        onMouseEnter={() => setHoverRating(ratingValue)}
+                        title={`${ratingValue}/10`}
+                      >
+                        ★
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label style={styles.formLabel}>Review</label>
+                <textarea 
+                  placeholder="Write your review here..." 
+                  value={reviewForm.text} 
+                  onChange={(e) => setReviewForm({...reviewForm, text: e.target.value})} 
+                  style={{...styles.textarea, width: "100%", boxSizing: "border-box"}} 
+                  rows="5" 
+                />
+              </div>
+
+              <div style={styles.formActions}>
+                <button 
+                  onClick={() => setShowReviewForm(false)} 
+                  style={styles.cancelButton}
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleSubmitReview} 
+                  style={styles.submitButton}
+                >
+                  Submit Review
+                </button>
+              </div>
             </div>
           )}
+
           <div style={styles.reviewsList}>
             {reviews.map((review) => (
               <div key={review._id} style={styles.reviewCard}>
