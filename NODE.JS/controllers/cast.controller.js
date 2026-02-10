@@ -2,7 +2,6 @@ import Cast from '../models/cast.js';
 import Movie from '../models/movie.js';
 import { z } from 'zod';
 
-// Optional: Validation schema for creating a cast member
 const castValidation = z.object({
     name: z.string().min(1, "Name is required"),
     bio: z.string().min(1, "Bio is required"),
@@ -60,6 +59,31 @@ export async function createCast(req, res) {
         return res.status(201).json({ success: true, message: 'Cast member created', data: newCast });
     } catch (error) {
         console.error("Error creating cast:", error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+}
+export async function deleteCast(req, res) {
+    try {
+        const { id } = req.params;
+
+        // Find and delete the cast member
+        const deletedCast = await Cast.findByIdAndDelete(id);
+
+        // Handle case where cast member doesn't exist
+        if (!deletedCast) {
+            return res.status(404).json({ success: false, error: 'Cast member not found' });
+        }
+
+        // Remove this cast member from all movies
+        await Movie.updateMany(
+            { cast: id },
+            { $pull: { cast: id } }
+        );
+
+        return res.status(200).json({ success: true, message: 'Cast member deleted successfully' });
+
+    } catch (error) {
+        console.error("Error deleting cast:", error);
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }

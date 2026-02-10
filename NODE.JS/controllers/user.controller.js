@@ -130,7 +130,7 @@ export async function getMe(req, res) {
     }
 }
 
-// Get all users: GET /api/auth/
+// Get all users: GET /api/user/
 export async function getAllUsers(req, res) {
     try {
         const users = await User.find({}).select('-password');

@@ -3,7 +3,7 @@ import { VaddMovie } from '../validations/movie.schema.js';
 
 export async function addMovie(req, res) {
     try {
-        // 1. Validate Input
+        // Validate Input
         const parsed = VaddMovie.safeParse(req.body);
         if (!parsed.success) {
             const issues = parsed.error.issues || [];
@@ -11,7 +11,7 @@ export async function addMovie(req, res) {
             return res.status(400).json({ success: false, error: errorMsg });
         }
 
-        // 2. Create Movie
+        // Create Movie
         // The cast array should contain IDs of existing cast members
         const movie = await Movie.create(parsed.data);
 
