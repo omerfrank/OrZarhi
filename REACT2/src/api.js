@@ -128,6 +128,24 @@ export const api = {
     });
     return res.json();
   },
+  
+  linkCastToMovie: async (movieId, castId) => {
+    const res = await fetch(`${API_BASE}/movie/${movieId}/cast`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ castId }),
+    });
+    return res.json();
+  },
+  
+  removeCastFromMovie: async (movieId, castId) => {
+    const res = await fetch(`${API_BASE}/movie/${movieId}/cast/${castId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    return res.json();
+  },
 
   getReviewsByMovie: async (movieId) => {
     const res = await fetch(`${API_BASE}/review/movie/${movieId}`, {

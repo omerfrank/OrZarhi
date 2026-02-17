@@ -8,10 +8,37 @@ export default function CastDetail({ navigate, castId }) {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    checkAdmin();
     loadCastDetails();
   }, [castId]);
+
+  const checkAdmin = async () => {
+    try {
+        const userRes = await api.getMe();
+        if (userRes.success && userRes.data.role === 'admin') {
+            setIsAdmin(true);
+        }
+    } catch (e) { console.error(e); }
+  };
+
+  const handleGlobalDelete = async () => {
+    if (!window.confirm("ARE YOU SURE? This will delete the actor from the database and remove them from ALL movies.")) return;
+    
+    try {
+        const res = await api.deleteCast(castId);
+        if (res.success) {
+            alert("Actor deleted successfully");
+            navigate("/movies"); // Redirect to home/movies page
+        } else {
+            setError(res.error || "Failed to delete actor");
+        }
+    } catch (err) {
+        setError("Network error during delete");
+    }
+  };
 
   const loadCastDetails = async () => {
     try {
@@ -53,6 +80,12 @@ export default function CastDetail({ navigate, castId }) {
         <div style={styles.header}>
             <button onClick={() => navigate("/movies")} style={styles.linkButton}>← Back to Movies</button>
             <button onClick={() => navigate("/profile")} style={styles.linkButton}>My Profile</button>
+        </div>
+        <div style={{display: "flex", gap: "10px"}}>
+              {isAdmin && (
+                  <button onClick={handleGlobalDelete} style={{...styles.button, backgroundColor: styles.danger}}>Delete Actor</button>
+              )}
+              <button onClick={() => navigate("/profile")} style={styles.linkButton}>My Profile</button>
         </div>
 
         <div style={styles.movieHero}> {/* Reusing movie hero style for consistency */}

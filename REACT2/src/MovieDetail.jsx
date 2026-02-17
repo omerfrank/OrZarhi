@@ -177,16 +177,23 @@ export default function MovieDetail({ navigate, movieId }) {
     }
   };
 
-  const handleDeleteCast = async (e, id) => {
-    e.stopPropagation(); // Prevent triggering card click
-    if (!window.confirm("Delete this cast member? This removes them from all movies.")) return;
+const handleUnlinkCast = async (e, castId) => {
+    e.stopPropagation(); 
+    if (!window.confirm("Remove this actor from this movie only?")) return;
+    
     try {
-        const res = await api.deleteCast(id);
-        if (res.success) setCast(cast.filter(c => c._id !== id));
-        else alert(res.error || "Failed to delete cast");
+        // Use the new removeCastFromMovie API instead of deleteCast
+        const res = await api.removeCastFromMovie(movieId, castId);
+        
+        if (res.success) {
+            // Update local state to remove the actor from the view
+            setCast(cast.filter(c => c._id !== castId));
+        } else {
+            alert(res.error || "Failed to remove actor from movie");
+        }
     } catch (err) {
         console.error(err);
-        alert("Error deleting cast");
+        alert("Error removing actor");
     }
   };
 
@@ -257,7 +264,7 @@ export default function MovieDetail({ navigate, movieId }) {
                         onClick={() => navigate(`/cast/${member._id}`)}
                     >
                         {isAdmin && (
-                            <button onClick={(e) => handleDeleteCast(e, member._id)} style={{ position: "absolute", top: 0, right: 0, background: styles.danger, color: "white", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", zIndex: 10 }}>✕</button>
+                            <button onClick={(e) => handleUnlinkCast(e, member._id)} style={{ position: "absolute", top: 0, right: 0, background: styles.danger, color: "white", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", zIndex: 10 }}>✕</button>
                         )}
                         <img src={member.photoURL} alt={member.name} style={styles.castPhoto} onError={(e) => { e.target.src = "https://via.placeholder.com/200x250?text=No+Photo"; }} />
                         <div style={styles.castInfo}>

@@ -1,6 +1,6 @@
 import express from 'express';
 import { reqLogin, reqAdmin } from '../middleware/middleware.auth.js';
-import { addMovie, getMovie, getAllMovies, deleteMovie, addCastToMovie, updateMovie} from '../controllers/movie.controller.js';
+import { addMovie, getMovie, getAllMovies, deleteMovie, addCastToMovie, updateMovie, removeCastFromMovie} from '../controllers/movie.controller.js';
 const router = express.Router();
 
 // GET /api/movie - Get all movies (supports ?genre=Action)
@@ -14,6 +14,8 @@ router.post('/', reqLogin, reqAdmin, addMovie);
 
 // DEL del
 router.delete('/:id', reqLogin, reqAdmin, deleteMovie);
+
+router.delete('/:id/cast/:castId', reqLogin, reqAdmin, removeCastFromMovie);
 
 router.post('/:id/cast', reqLogin, reqAdmin, addCastToMovie);
 

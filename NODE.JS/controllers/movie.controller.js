@@ -116,10 +116,6 @@ export async function addCastToMovie(req, res) {
 export async function updateMovie(req, res) {
     try {
         const { id } = req.params;
-        
-        // Optional: Validate req.body using VaddMovie or a specific update schema
-        // const parsed = VaddMovie.partial().safeParse(req.body); 
-        // if (!parsed.success) ...
 
         const updatedMovie = await Movie.findByIdAndUpdate(
             id,
@@ -139,6 +135,28 @@ export async function updateMovie(req, res) {
 
     } catch (error) {
         console.error('Update Movie Error:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+}
+
+export async function removeCastFromMovie(req, res) {
+    try {
+        const { id, castId } = req.params;
+
+        const movie = await Movie.findByIdAndUpdate(
+            id,
+            { $pull: { cast: castId } },
+            { new: true }
+        ).populate('cast');
+
+        if (!movie) {
+            return res.status(404).json({ success: false, error: 'Movie not found' });
+        }
+
+        return res.status(200).json({ success: true, message: 'Cast member removed from movie', data: movie });
+
+    } catch (error) {
+        console.error('Remove Cast Error:', error);
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }
