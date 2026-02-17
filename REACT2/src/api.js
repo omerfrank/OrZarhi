@@ -5,8 +5,8 @@ export const api = {
   login: async (email, password) => {
     const res = await fetch(`${API_BASE}/user/login`, {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json"
+      headers: {
+        "Content-Type": "application/json",
       },
       credentials: "include",
       body: JSON.stringify({ email, password }),
@@ -38,7 +38,7 @@ export const api = {
     });
     return res.json();
   },
-  
+
   getMovie: async (id) => {
     const res = await fetch(`${API_BASE}/movie/${id}`, {
       credentials: "include",
@@ -73,25 +73,18 @@ export const api = {
     return res.json();
   },
 
-  getUser: async (userId) => {
-    const res = await fetch(`${API_BASE}/user/${userId}`, {
-      credentials: "include",
-    });
-    return res.json();
-  },
-  
   // Cookie is automatically sent with credentials: "include"
   getMe: async () => {
     const res = await fetch(`${API_BASE}/user/me`, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       credentials: "include", // Browser automatically sends the cookie
     });
     return res.json();
   },
-  
+
   getCastByMovie: async (movieId) => {
     const res = await fetch(`${API_BASE}/cast/movie/${movieId}`, {
       credentials: "include",
@@ -129,16 +122,6 @@ export const api = {
     return res.json();
   },
 
-  linkCastToMovie: async (movieId, castId) => {
-    const res = await fetch(`${API_BASE}/movie/${movieId}/cast`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ castId }),
-    });
-    return res.json();
-  },
-  
   removeCastFromMovie: async (movieId, castId) => {
     const res = await fetch(`${API_BASE}/movie/${movieId}/cast/${castId}`, {
       method: "DELETE",
@@ -153,7 +136,7 @@ export const api = {
     });
     return res.json();
   },
-  
+
   addReview: async (reviewData) => {
     const res = await fetch(`${API_BASE}/review`, {
       method: "POST",
@@ -179,7 +162,7 @@ export const api = {
     });
     return res.json();
   },
-  
+
   removeFavorite: async (movieId) => {
     const res = await fetch(`${API_BASE}/user/remove-favorite`, {
       method: "DELETE",
@@ -191,11 +174,11 @@ export const api = {
   },
   linkCastToMovie: async (movieId, castId, role) => {
     const res = await fetch(`${API_BASE}/movie/${movieId}/cast`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ castId, role }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ castId, role }),
     });
     return res.json();
-  }
+  },
 };
