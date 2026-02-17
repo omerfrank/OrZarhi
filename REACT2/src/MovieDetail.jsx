@@ -17,7 +17,7 @@ export default function MovieDetail({ navigate, movieId }) {
   // Review form state
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ title: "", rating: 5, text: "" });
-  const [hoverRating, setHoverRating] = useState(0); // For star hover effect
+  const [hoverRating, setHoverRating] = useState(0); 
 
   // Cast Creation Modal State
   const [showCastModal, setShowCastModal] = useState(false);
@@ -27,15 +27,21 @@ export default function MovieDetail({ navigate, movieId }) {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [allCast, setAllCast] = useState([]);
   const [linkSearch, setLinkSearch] = useState("");
+  
+  // NEW STATE: Track selected actor for linking and the input for their role
+  const [selectedActor, setSelectedActor] = useState(null);
+  const [roleInput, setRoleInput] = useState("");
 
   useEffect(() => {
     loadMovieDetails();
   }, [movieId]);
 
-  // Load "All Cast" when the Link Modal is opened
   useEffect(() => {
     if (showLinkModal) {
       loadAllCast();
+      // Reset selection when modal opens
+      setSelectedActor(null);
+      setRoleInput("");
     }
   }, [showLinkModal]);
 
@@ -113,7 +119,6 @@ export default function MovieDetail({ navigate, movieId }) {
         setReviews([result.data, ...reviews]);
         setReviewForm({ title: "", rating: 5, text: "" });
         setShowReviewForm(false);
-        // Reload details to get the populated user info for the new review
         loadMovieDetails();
       }
     } catch (err) { console.error("Failed to submit review", err); }
@@ -148,8 +153,7 @@ export default function MovieDetail({ navigate, movieId }) {
                 alert("Cast member created and linked!");
                 setShowCastModal(false);
                 setNewCast({ name: "", bio: "", role: "", photoURL: "", birthDay: "" });
-                loadMovieDetails(); // Reload to get updated cast list with populated roles
-                //setCast([...cast, createdCast]);
+                loadMovieDetails();
             } else {
                 alert("Cast created, but failed to link: " + (linkRes.error || "Unknown error"));
             }
@@ -162,16 +166,27 @@ export default function MovieDetail({ navigate, movieId }) {
     }
   };
 
-  const handleLinkExisting = async (actor) => {
-    const role = window.prompt(`Enter role for ${actor.name} in this movie:`);
-    if (!role) return; // Cancelled
+  // CHANGED: Instead of window.prompt, this now just selects the actor to show the secondary form
+  const handleActorSelect = (actor) => {
+    setSelectedActor(actor);
+    setRoleInput(""); // Reset input
+  };
+
+  // NEW FUNCTION: Submits the link after the role is entered in the modal
+  const submitLinkActor = async () => {
+    if (!roleInput.trim()) {
+        alert("Please enter a role");
+        return;
+    }
+
     try {
-        const res = await api.linkCastToMovie(movieId, actor._id, role);
+        const res = await api.linkCastToMovie(movieId, selectedActor._id, roleInput);
         if (res.success) {
-            setCast([...cast, actor]);
             setShowLinkModal(false);
-            alert(`${actor.name} added to movie!`);
-            loadMovieDetails(); // Reload to show updated cast list with role info
+            setSelectedActor(null);
+            setRoleInput("");
+            alert(`${selectedActor.name} added to movie!`);
+            loadMovieDetails(); 
         } else {
             alert(res.error || "Failed to link actor");
         }
@@ -181,23 +196,14 @@ export default function MovieDetail({ navigate, movieId }) {
     }
   };
 
-  const getRoleForMovie = (member) => {
-      if (!member.roles || !Array.isArray(member.roles)) return "Unknown Role";
-      // Find role entry where movie ID matches current movieId
-      const entry = member.roles.find(r => r.movie === movieId || r.movie?._id === movieId);
-      return entry ? entry.role : "Unknown Role";
-  };
-
-const handleUnlinkCast = async (e, castId) => {
+  const handleUnlinkCast = async (e, castId) => {
     e.stopPropagation(); 
     if (!window.confirm("Remove this actor from this movie only?")) return;
     
     try {
-        // Use the new removeCastFromMovie API instead of deleteCast
         const res = await api.removeCastFromMovie(movieId, castId);
         
         if (res.success) {
-            // Update local state to remove the actor from the view
             setCast(cast.filter(c => c._id !== castId));
         } else {
             alert(res.error || "Failed to remove actor from movie");
@@ -206,6 +212,13 @@ const handleUnlinkCast = async (e, castId) => {
         console.error(err);
         alert("Error removing actor");
     }
+  };
+
+  // Helper to find the role for this specific movie
+  const getRoleForMovie = (member) => {
+      if (!member.roles || !Array.isArray(member.roles)) return "Unknown Role";
+      const entry = member.roles.find(r => r.movie === movieId || r.movie?._id === movieId);
+      return entry ? entry.role : "Unknown Role";
   };
 
   if (loading) return <div style={styles.baseContainer}><p style={styles.loadingText}>Loading movie...</p></div>;
@@ -265,7 +278,7 @@ const handleUnlinkCast = async (e, castId) => {
                 )}
             </div>
             
-{cast.length > 0 ? (
+            {cast.length > 0 ? (
                 <div style={styles.castGrid}>
                 {cast.map((member) => (
                     <div 
@@ -279,7 +292,6 @@ const handleUnlinkCast = async (e, castId) => {
                         <img src={member.photoURL} alt={member.name} style={styles.castPhoto} onError={(e) => { e.target.src = "https://via.placeholder.com/200x250?text=No+Photo"; }} />
                         <div style={styles.castInfo}>
                             <h3 style={styles.castName}>{member.name}</h3>
-                            {/* Updated to use helper function */}
                             <p style={styles.castRole}>{getRoleForMovie(member)}</p>
                         </div>
                     </div>
@@ -312,6 +324,7 @@ const handleUnlinkCast = async (e, castId) => {
             )}
           </div>
           
+          {/* ... Review Form (No changes here) ... */}
           {showReviewForm && (
             <div style={styles.reviewForm}>
               <div>
@@ -324,7 +337,6 @@ const handleUnlinkCast = async (e, castId) => {
                   style={{...styles.input, width: "100%", boxSizing: "border-box"}} 
                 />
               </div>
-              
               <div>
                 <label style={styles.formLabel}>Your Rating: <span style={{color: styles.accentColor}}>{reviewForm.rating}/10</span></label>
                 <div style={styles.starContainer} onMouseLeave={() => setHoverRating(0)}>
@@ -347,7 +359,6 @@ const handleUnlinkCast = async (e, castId) => {
                   })}
                 </div>
               </div>
-
               <div>
                 <label style={styles.formLabel}>Review</label>
                 <textarea 
@@ -358,7 +369,6 @@ const handleUnlinkCast = async (e, castId) => {
                   rows="5" 
                 />
               </div>
-
               <div style={styles.formActions}>
                 <button 
                   onClick={() => setShowReviewForm(false)} 
@@ -433,7 +443,7 @@ const handleUnlinkCast = async (e, castId) => {
             </div>
         )}
 
-        {/* Link Existing Actor Modal */}
+        {/* Link Existing Actor Modal*/}
         {showLinkModal && (
             <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.8)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
                 <div style={{...styles.card, maxWidth: "600px", width: "90%", maxHeight: "80vh", display: "flex", flexDirection: "column" }}>
@@ -442,50 +452,80 @@ const handleUnlinkCast = async (e, castId) => {
                         <button onClick={() => setShowLinkModal(false)} style={{background: "none", border: "none", fontSize: "20px", cursor: "pointer"}}>✕</button>
                     </div>
                     
-                    <input 
-                        style={{...styles.input, marginBottom: "20px"}} 
-                        placeholder="Search actors..." 
-                        value={linkSearch}
-                        onChange={(e) => setLinkSearch(e.target.value)}
-                        autoFocus
-                    />
-
-                    <div style={{ overflowY: "auto", flex: 1, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: "15px" }}>
-                        {availableActors.map(actor => (
-                            <div 
-                                key={actor._id} 
-                                onClick={() => handleLinkExisting(actor)}
-                                style={{ 
-                                    border: "1px solid #ddd", 
-                                    borderRadius: "8px", 
-                                    padding: "10px", 
-                                    cursor: "pointer", 
-                                    textAlign: "center",
-                                    transition: "transform 0.2s"
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-                                onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-                            >
+                    {selectedActor ? (
+                         <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                                 <img 
-                                    src={actor.photoURL} 
-                                    alt={actor.name} 
-                                    style={{ width: "100%", height: "120px", objectFit: "cover", borderRadius: "4px", marginBottom: "8px" }}
-                                    onError={(e) => e.target.src = "https://via.placeholder.com/100x120?text=No+Photo"}
+                                    src={selectedActor.photoURL} 
+                                    alt={selectedActor.name} 
+                                    style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover" }}
+                                    onError={(e) => e.target.src = "https://via.placeholder.com/50"}
                                 />
-                                <div style={{ fontWeight: "bold", fontSize: "14px" }}>{actor.name}</div>
-                                <div style={{ fontSize: "12px", color: "#666" }}>{actor.role}</div>
+                                <div>
+                                    <h3 style={{ margin: 0 }}>{selectedActor.name}</h3>
+                                    <p style={{ margin: 0, fontSize: "12px", color: "#666" }}>Enter role for this movie</p>
+                                </div>
                             </div>
-                        ))}
-                        {availableActors.length === 0 && (
-                            <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "20px", color: "#666" }}>
-                                No actors found matching "{linkSearch}"
+                            
+                            <input 
+                                style={styles.input} 
+                                placeholder="Role (e.g. Commander Shepard)"
+                                value={roleInput}
+                                onChange={e => setRoleInput(e.target.value)}
+                                autoFocus
+                            />
+                            
+                            <div style={{display: "flex", gap: "10px", marginTop: "10px"}}>
+                                <button onClick={submitLinkActor} style={{...styles.button, flex: 1}}>Confirm Link</button>
+                                <button onClick={() => setSelectedActor(null)} style={{...styles.cancelButton, flex: 1}}>Back to Search</button>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    ) : (
+                        <>
+                            <input 
+                                style={{...styles.input, marginBottom: "20px"}} 
+                                placeholder="Search actors..." 
+                                value={linkSearch}
+                                onChange={(e) => setLinkSearch(e.target.value)}
+                                autoFocus
+                            />
+
+                            <div style={{ overflowY: "auto", flex: 1, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: "15px" }}>
+                                {availableActors.map(actor => (
+                                    <div 
+                                        key={actor._id} 
+                                        onClick={() => handleActorSelect(actor)}
+                                        style={{ 
+                                            border: "1px solid #ddd", 
+                                            borderRadius: "8px", 
+                                            padding: "10px", 
+                                            cursor: "pointer", 
+                                            textAlign: "center",
+                                            transition: "transform 0.2s"
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+                                        onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                                    >
+                                        <img 
+                                            src={actor.photoURL} 
+                                            alt={actor.name} 
+                                            style={{ width: "100%", height: "120px", objectFit: "cover", borderRadius: "4px", marginBottom: "8px" }}
+                                            onError={(e) => e.target.src = "https://via.placeholder.com/100x120?text=No+Photo"}
+                                        />
+                                        <div style={{ fontWeight: "bold", fontSize: "14px" }}>{actor.name}</div>
+                                    </div>
+                                ))}
+                                {availableActors.length === 0 && (
+                                    <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "20px", color: "#666" }}>
+                                        No actors found matching "{linkSearch}"
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         )}
-
       </div>
     </div>
   );
