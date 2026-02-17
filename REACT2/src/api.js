@@ -1,3 +1,4 @@
+// REACT2/src/api.js
 const API_BASE = "http://localhost:3000/api";
 
 export const api = {
@@ -90,6 +91,13 @@ export const api = {
   },
   getAllCast: async () => {
     const res = await fetch(`${API_BASE}/cast`, {
+      credentials: "include",
+    });
+    return res.json();
+  },
+  // Added getCast for single member fetch
+  getCast: async (id) => {
+    const res = await fetch(`${API_BASE}/cast/${id}`, {
       credentials: "include",
     });
     return res.json();

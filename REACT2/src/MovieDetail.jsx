@@ -1,3 +1,4 @@
+// REACT2/src/MovieDetail.jsx
 import { useState, useEffect } from "react";
 import { api } from "./api";
 import { styles } from "./styles";
@@ -176,7 +177,8 @@ export default function MovieDetail({ navigate, movieId }) {
     }
   };
 
-  const handleDeleteCast = async (id) => {
+  const handleDeleteCast = async (e, id) => {
+    e.stopPropagation(); // Prevent triggering card click
     if (!window.confirm("Delete this cast member? This removes them from all movies.")) return;
     try {
         const res = await api.deleteCast(id);
@@ -191,7 +193,6 @@ export default function MovieDetail({ navigate, movieId }) {
   if (loading) return <div style={styles.baseContainer}><p style={styles.loadingText}>Loading movie...</p></div>;
   if (!movie) return <div style={styles.baseContainer}><p style={styles.error}>Movie not found</p></div>;
 
-  // Filter existing actors out of the link gallery
   const availableActors = allCast.filter(
     actor => 
       !cast.some(existing => existing._id === actor._id) &&
@@ -249,9 +250,14 @@ export default function MovieDetail({ navigate, movieId }) {
             {cast.length > 0 ? (
                 <div style={styles.castGrid}>
                 {cast.map((member) => (
-                    <div key={member._id} style={{...styles.castCard, position: "relative"}}>
+                    // Added onClick to navigate and cursor style
+                    <div 
+                        key={member._id} 
+                        style={{...styles.castCard, position: "relative", cursor: "pointer"}}
+                        onClick={() => navigate(`/cast/${member._id}`)}
+                    >
                         {isAdmin && (
-                            <button onClick={() => handleDeleteCast(member._id)} style={{ position: "absolute", top: 0, right: 0, background: styles.danger, color: "white", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>✕</button>
+                            <button onClick={(e) => handleDeleteCast(e, member._id)} style={{ position: "absolute", top: 0, right: 0, background: styles.danger, color: "white", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", zIndex: 10 }}>✕</button>
                         )}
                         <img src={member.photoURL} alt={member.name} style={styles.castPhoto} onError={(e) => { e.target.src = "https://via.placeholder.com/200x250?text=No+Photo"; }} />
                         <div style={styles.castInfo}>

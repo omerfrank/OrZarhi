@@ -1,9 +1,11 @@
+// REACT2/src/App.jsx
 import { useState } from "react";
 import Router from "./Router.jsx";
 import LoginPage from "./LoginPage.jsx";
 import MovieLibrary from "./MovieLibrary.jsx";
 import UserProfile from "./UserProfile.jsx";
-import MovieDetail from "./MovieDetail.jsx"
+import MovieDetail from "./MovieDetail.jsx";
+import CastDetail from "./CastDetail.jsx"; //
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -34,6 +36,14 @@ export default function App() {
               <MovieDetail 
                 navigate={navigate} 
                 movieId={currentPath.split("/")[2]} 
+              />
+            )}
+            
+            {/* Added route for CastDetail */}
+            {currentPath.startsWith("/cast/") && isAuthenticated && (
+              <CastDetail 
+                navigate={navigate} 
+                castId={currentPath.split("/")[2]} 
               />
             )}
 
