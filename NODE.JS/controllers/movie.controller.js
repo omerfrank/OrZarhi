@@ -1,4 +1,5 @@
 import Movie from '../models/movie.js';
+import Cast from '../models/cast.js';
 import { VaddMovie } from '../validations/movie.schema.js';
 import Review from '../models/review.js';
 export async function addMovie(req, res) {
@@ -89,11 +90,10 @@ export async function deleteMovie(req, res) {
 export async function addCastToMovie(req, res) {
     try {
         const { id } = req.params; // Movie ID
-        const { castId } = req.body; // Cast Member ID
+        const { castId, role } = req.body; // Cast Member ID
 
-        if (!castId) {
-            return res.status(400).json({ success: false, error: 'Cast ID is required' });
-        }
+        if (!castId) return res.status(400).json({ success: false, error: 'Cast ID is required' });
+        if (!role) return res.status(400).json({ success: false, error: 'Role is required' });
 
         // Use $addToSet to prevent duplicate entries of the same actor
         const movie = await Movie.findByIdAndUpdate(
@@ -102,9 +102,15 @@ export async function addCastToMovie(req, res) {
             { new: true }
         ).populate('cast');
 
-        if (!movie) {
-            return res.status(404).json({ success: false, error: 'Movie not found' });
-        }
+        if (!movie) return res.status(404).json({ success: false, error: 'Movie not found' });
+
+        // Add Role info to Cast Member
+        await Cast.findByIdAndUpdate(castId, {
+            $pull: { roles: { movie: id } }
+        });
+        await Cast.findByIdAndUpdate(castId, {
+            $push: { roles: { movie: id, role: role } }
+        });
 
         return res.status(200).json({ success: true, message: 'Cast linked to movie', data: movie });
 
@@ -113,6 +119,7 @@ export async function addCastToMovie(req, res) {
         return res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }
+
 export async function updateMovie(req, res) {
     try {
         const { id } = req.params;
@@ -149,9 +156,13 @@ export async function removeCastFromMovie(req, res) {
             { new: true }
         ).populate('cast');
 
-        if (!movie) {
-            return res.status(404).json({ success: false, error: 'Movie not found' });
-        }
+        if (!movie) return res.status(404).json({ success: false, error: 'Movie not found' });
+
+        // Remove the Role entry from the Cast member for this specific movie
+        await Cast.findByIdAndUpdate(
+            castId,
+            { $pull: { roles: { movie: id } } }
+        );
 
         return res.status(200).json({ success: true, message: 'Cast member removed from movie', data: movie });
 

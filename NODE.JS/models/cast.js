@@ -11,11 +11,17 @@ const castSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    role: {
-        type: String,
-        required: true,
-        trim: true,
-    },
+    roles: [{
+        movie: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Movies'
+        },
+        role: {
+            type: String,
+            required: true,
+            trim: true
+        }
+    }],
     photoURL: {
         type: String,
     },

@@ -5,9 +5,8 @@ import { z } from 'zod';
 const castValidation = z.object({
     name: z.string().min(1, "Name is required"),
     bio: z.string().min(1, "Bio is required"),
-    role: z.string().min(1, "Role is required"),
     photoURL: z.string().optional(),
-    birthDay: z.string().or(z.date()).transform((val) => newDGate(val)), // Basic date transform
+    birthDay: z.string().or(z.date()).transform((val) => new Date(val)), // Basic date transform
 });
 
 export async function getCastById(req, res) {
@@ -61,12 +60,12 @@ export async function getAllCast(req, res) {
 export async function createCast(req, res) {
     try {
 
-        const { name, bio, role, photoURL, birthDay } = req.body;
+        const { name, bio, photoURL, birthDay } = req.body;
 
         const newCast = await Cast.create({
             name,
             bio,
-            role,
+            roles: [],
             photoURL,
             birthDay
         });

@@ -71,6 +71,12 @@ export default function CastDetail({ navigate, castId }) {
     }
   };
 
+  const getRoleForMovie = (movieId) => {
+      if (!cast || !cast.roles) return "";
+      const entry = cast.roles.find(r => r.movie === movieId || r.movie?._id === movieId);
+      return entry ? ` as ${entry.role}` : "";
+  };
+
   if (loading) return <div style={styles.baseContainer}><p style={styles.loadingText}>Loading...</p></div>;
   if (error || !cast) return <div style={styles.baseContainer}><p style={styles.error}>{error || "Not found"}</p></div>;
 
@@ -85,7 +91,6 @@ export default function CastDetail({ navigate, castId }) {
               {isAdmin && (
                   <button onClick={handleGlobalDelete} style={{...styles.button, backgroundColor: styles.danger}}>Delete Actor</button>
               )}
-              <button onClick={() => navigate("/profile")} style={styles.linkButton}>My Profile</button>
         </div>
 
         <div style={styles.movieHero}> {/* Reusing movie hero style for consistency */}
@@ -100,10 +105,6 @@ export default function CastDetail({ navigate, castId }) {
             <p style={{...styles.movieDetailYear, color: styles.accentColor}}>
                 Born: {new Date(cast.birthDay).toLocaleDateString()}
             </p>
-            {/* Displaying 'role' as a known-for tag or just generic info */}
-            <div style={styles.genreContainer}>
-                <span style={styles.genreBadge}>{cast.role}</span>
-            </div>
             <h3 style={{marginTop: "20px", color: styles.textMain}}>Biography</h3>
             <p style={styles.movieDetailDescription}>{cast.bio}</p>
           </div>
@@ -123,6 +124,10 @@ export default function CastDetail({ navigate, castId }) {
                         onError={(e) => { e.target.src = "https://via.placeholder.com/200x300?text=No+Image"; }} 
                     />
                     <h4 style={styles.relatedTitle}>{movie.title}</h4>
+                    {/* Display the specific role for this movie */}
+                    <div style={{fontSize: "13px", color: styles.accentColor, fontWeight: "bold", margin: "5px 0"}}>
+                        {getRoleForMovie(movie._id)}
+                    </div>
                     <span style={{fontSize: "12px", color: "#666"}}>{new Date(movie.releaseDate).getFullYear()}</span>
                     </div>
                 ))}

@@ -128,7 +128,7 @@ export const api = {
     });
     return res.json();
   },
-  
+
   linkCastToMovie: async (movieId, castId) => {
     const res = await fetch(`${API_BASE}/movie/${movieId}/cast`, {
         method: "POST",
@@ -189,12 +189,12 @@ export const api = {
     });
     return res.json();
   },
-  linkCastToMovie: async (movieId, castId) => {
+  linkCastToMovie: async (movieId, castId, role) => {
     const res = await fetch(`${API_BASE}/movie/${movieId}/cast`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ castId }),
+        body: JSON.stringify({ castId, role }),
     });
     return res.json();
   }

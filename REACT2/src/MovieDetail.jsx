@@ -143,12 +143,13 @@ export default function MovieDetail({ navigate, movieId }) {
         const res = await api.addCast(newCast);
         if (res.success) {
             const createdCast = res.data;
-            const linkRes = await api.linkCastToMovie(movieId, createdCast._id);
+            const linkRes = await api.linkCastToMovie(movieId, createdCast._id, newCast.role);
             if (linkRes.success) {
                 alert("Cast member created and linked!");
                 setShowCastModal(false);
                 setNewCast({ name: "", bio: "", role: "", photoURL: "", birthDay: "" });
-                setCast([...cast, createdCast]);
+                loadMovieDetails(); // Reload to get updated cast list with populated roles
+                //setCast([...cast, createdCast]);
             } else {
                 alert("Cast created, but failed to link: " + (linkRes.error || "Unknown error"));
             }
@@ -162,12 +163,15 @@ export default function MovieDetail({ navigate, movieId }) {
   };
 
   const handleLinkExisting = async (actor) => {
+    const role = window.prompt(`Enter role for ${actor.name} in this movie:`);
+    if (!role) return; // Cancelled
     try {
-        const res = await api.linkCastToMovie(movieId, actor._id);
+        const res = await api.linkCastToMovie(movieId, actor._id, role);
         if (res.success) {
             setCast([...cast, actor]);
             setShowLinkModal(false);
             alert(`${actor.name} added to movie!`);
+            loadMovieDetails(); // Reload to show updated cast list with role info
         } else {
             alert(res.error || "Failed to link actor");
         }
@@ -175,6 +179,13 @@ export default function MovieDetail({ navigate, movieId }) {
         console.error(err);
         alert("Error linking actor");
     }
+  };
+
+  const getRoleForMovie = (member) => {
+      if (!member.roles || !Array.isArray(member.roles)) return "Unknown Role";
+      // Find role entry where movie ID matches current movieId
+      const entry = member.roles.find(r => r.movie === movieId || r.movie?._id === movieId);
+      return entry ? entry.role : "Unknown Role";
   };
 
 const handleUnlinkCast = async (e, castId) => {
@@ -254,10 +265,9 @@ const handleUnlinkCast = async (e, castId) => {
                 )}
             </div>
             
-            {cast.length > 0 ? (
+{cast.length > 0 ? (
                 <div style={styles.castGrid}>
                 {cast.map((member) => (
-                    // Added onClick to navigate and cursor style
                     <div 
                         key={member._id} 
                         style={{...styles.castCard, position: "relative", cursor: "pointer"}}
@@ -269,7 +279,8 @@ const handleUnlinkCast = async (e, castId) => {
                         <img src={member.photoURL} alt={member.name} style={styles.castPhoto} onError={(e) => { e.target.src = "https://via.placeholder.com/200x250?text=No+Photo"; }} />
                         <div style={styles.castInfo}>
                             <h3 style={styles.castName}>{member.name}</h3>
-                            <p style={styles.castRole}>{member.role}</p>
+                            {/* Updated to use helper function */}
+                            <p style={styles.castRole}>{getRoleForMovie(member)}</p>
                         </div>
                     </div>
                 ))}
