@@ -4,13 +4,15 @@ import { styles } from "./styles";
 
 export default function MovieLibrary({ navigate }) {
   const [movies, setMovies] = useState([]);
-  const [favorites, setFavorites] = useState(new Set()); // Store favorite IDs
+  const [favorites, setFavorites] = useState(new Set()); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  
+  // 1. State for editing
+  const [editingId, setEditingId] = useState(null);
 
-  // Modal State
   const [showModal, setShowModal] = useState(false);
   const [newMovie, setNewMovie] = useState({
     title: "",
@@ -26,7 +28,6 @@ export default function MovieLibrary({ navigate }) {
 
   const loadData = async () => {
     try {
-      // Fetch movies and user data in parallel
       const [moviesRes, userRes] = await Promise.all([
         api.getMovies(),
         api.getMe()
@@ -39,11 +40,9 @@ export default function MovieLibrary({ navigate }) {
       }
 
       if (userRes.success) {
-        // Create a Set of favorite movie IDs for O(1) lookup
         const favIds = new Set(userRes.data.favorites.map(f => f._id || f));
         setFavorites(favIds);
         
-        // Check Admin
         if (userRes.data.role === 'admin') {
             setIsAdmin(true);
         }
@@ -57,10 +56,9 @@ export default function MovieLibrary({ navigate }) {
   };
 
   const toggleFavorite = async (e, movie) => {
-    e.stopPropagation(); // Prevent clicking the card event if any
+    e.stopPropagation(); 
     const isFav = favorites.has(movie._id);
     
-    // Optimistic UI update
     const newFavorites = new Set(favorites);
     if (isFav) {
       newFavorites.delete(movie._id);
@@ -76,9 +74,77 @@ export default function MovieLibrary({ navigate }) {
         await api.addFavorite(movie._id);
       }
     } catch (err) {
-      // Revert on error
       console.error("Failed to update favorite", err);
       setFavorites(favorites);
+    }
+  };
+
+  // 2. Helper to open modal for editing
+  const handleEditClick = (e, movie) => {
+    e.stopPropagation(); 
+    setEditingId(movie._id);
+    
+    setNewMovie({
+      title: movie.title,
+      description: movie.description || "",
+      genre: movie.genre.join(", "),
+      releaseDate: new Date(movie.releaseDate).toISOString().split('T')[0], 
+      posterURL: movie.posterURL
+    });
+    
+    setShowModal(true);
+  };
+
+  // 3. Helper to open modal for creating (resets state)
+  const handleCreateClick = () => {
+    setEditingId(null);
+    setNewMovie({ title: "", description: "", genre: "", releaseDate: "", posterURL: "" });
+    setShowModal(true);
+  };
+
+  // 4. Combined Save Function (Replaces handleAddMovie)
+  const handleSaveMovie = async () => {
+    if (!newMovie.title || !newMovie.releaseDate || !newMovie.posterURL) {
+        alert("Please fill in required fields");
+        return;
+    }
+
+    try {
+        const genreArray = newMovie.genre.includes(",") 
+            ? newMovie.genre.split(",").map(g => g.trim()).filter(g => g)
+            : [newMovie.genre];
+
+        const moviePayload = {
+            ...newMovie,
+            genre: genreArray,
+        };
+
+        let res;
+        if (editingId) {
+            // EDIT MODE
+            res = await api.updateMovie(editingId, moviePayload);
+        } else {
+            // ADD MODE
+            res = await api.addMovie({ ...moviePayload, cast: [] });
+        }
+
+        if (res.success) {
+            if (editingId) {
+                // Update local list with edited movie
+                setMovies(movies.map(m => m._id === editingId ? res.data : m));
+            } else {
+                // Add new movie to local list
+                setMovies([...movies, res.data]);
+            }
+            setShowModal(false);
+            setNewMovie({ title: "", description: "", genre: "", releaseDate: "", posterURL: "" });
+            setEditingId(null);
+        } else {
+            alert(res.error || "Failed to save movie");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error saving movie");
     }
   };
 
@@ -96,34 +162,6 @@ export default function MovieLibrary({ navigate }) {
     } catch (err) {
         console.error(err);
         alert("Error deleting movie");
-    }
-  };
-
-  const handleAddMovie = async () => {
-    if (!newMovie.title || !newMovie.releaseDate || !newMovie.posterURL) {
-        alert("Please fill in required fields");
-        return;
-    }
-
-    try {
-        // Format genre from string to array
-        const moviePayload = {
-            ...newMovie,
-            genre: newMovie.genre.split(",").map(g => g.trim()).filter(g => g),
-            cast: [] // Assuming empty cast initially as per current backend constraints
-        };
-
-        const res = await api.addMovie(moviePayload);
-        if (res.success) {
-            setMovies([...movies, res.data]);
-            setShowModal(false);
-            setNewMovie({ title: "", description: "",ZSgenre: "", releaseDate: "", posterURL: "" });
-        } else {
-            alert(res.error || "Failed to add movie");
-        }
-    } catch (err) {
-        console.error(err);
-        alert("Error adding movie");
     }
   };
 
@@ -151,7 +189,7 @@ export default function MovieLibrary({ navigate }) {
           <div style={{ display: "flex", gap: "10px" }}>
             {isAdmin && (
                 <button 
-                    onClick={() => setShowModal(true)} 
+                    onClick={handleCreateClick}  /* FIX: Call handleCreateClick, not setShowModal */
                     style={{...styles.button, marginTop: 0}}
                 >
                     + Add Movie
@@ -189,24 +227,39 @@ export default function MovieLibrary({ navigate }) {
               </button>
               
               {isAdmin && (
+                <div style={{ position: "absolute", top: "5px", right: "5px", zIndex: 10, display: "flex", gap: "5px" }}>
+                  {/* FIX: ADD EDIT BUTTON */}
                   <button
                     style={{
-                        position: "absolute",
-                        top: "5px",
-                        right: "5px",
+                        background: styles.blueLink,
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "5px 10px",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        fontSize: "12px"
+                    }}
+                    onClick={(e) => handleEditClick(e, movie)}
+                  >
+                    ✎
+                  </button>
+
+                  <button
+                    style={{
                         background: styles.danger,
                         color: "white",
                         border: "none",
                         borderRadius: "4px",
                         padding: "5px 10px",
                         cursor: "pointer",
-                        zIndex: 10,
                         fontWeight: "bold"
                     }}
                     onClick={(e) => handleDeleteMovie(e, movie._id)}
                   >
                     ✕
                   </button>
+                </div>
               )}
 
               <img
@@ -242,7 +295,7 @@ export default function MovieLibrary({ navigate }) {
           <p style={styles.noResults}>No movies found</p>
         )}
 
-        {/* Add Movie Modal */}
+        {/* Modal */}
         {showModal && (
             <div style={{
                 position: "fixed",
@@ -257,7 +310,8 @@ export default function MovieLibrary({ navigate }) {
                 zIndex: 1000
             }}>
                 <div style={{...styles.card, maxWidth: "500px", position: "relative"}}>
-                    <h2 style={styles.title}>Add New Movie</h2>
+                    {/* FIX: Dynamic Title */}
+                    <h2 style={styles.title}>{editingId ? "Edit Movie" : "Add New Movie"}</h2>
                     <div style={styles.form}>
                         <input 
                             style={styles.input} 
@@ -290,7 +344,10 @@ export default function MovieLibrary({ navigate }) {
                             onChange={e => setNewMovie({...newMovie, description: e.target.value})}
                         />
                         <div style={{display: "flex", gap: "10px", marginTop: "10px"}}>
-                            <button onClick={handleAddMovie} style={{...styles.button, flex: 1}}>Add Movie</button>
+                            {/* FIX: Call handleSaveMovie, and Dynamic Button Text */}
+                            <button onClick={handleSaveMovie} style={{...styles.button, flex: 1}}>
+                                {editingId ? "Save Changes" : "Add Movie"}
+                            </button>
                             <button onClick={() => setShowModal(false)} style={{...styles.linkButton, flex: 1, borderColor: styles.textSecondary, color: styles.textSecondary}}>Cancel</button>
                         </div>
                     </div>

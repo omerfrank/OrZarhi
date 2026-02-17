@@ -55,6 +55,15 @@ export const api = {
     });
     return res.json();
   },
+  updateMovie: async (id, movieData) => {
+    const res = await fetch(`${API_BASE}/movie/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(movieData),
+    });
+    return res.json();
+  },
 
   deleteMovie: async (id) => {
     const res = await fetch(`${API_BASE}/movie/${id}`, {
