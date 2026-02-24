@@ -33,19 +33,16 @@ export const api = {
   },
 
   getMovies: async () => {
-    // 1. Check if movies are already in local storage
     const cachedMovies = localStorage.getItem("movies");
     if (cachedMovies) {
       return { success: true, data: JSON.parse(cachedMovies) };
     }
 
-    // 2. If not, fetch from the backend
     const res = await fetch(`${API_BASE}/movie`, {
       credentials: "include",
     });
     const data = await res.json();
     
-    // 3. Save the result to local storage for future use
     if (data.success) {
       localStorage.setItem("movies", JSON.stringify(data.data));
     }
@@ -66,7 +63,6 @@ addMovie: async (movieData) => {
       credentials: "include",
       body: JSON.stringify(movieData),
     });
-    // Invalidate cache so the library refreshes next time
     localStorage.removeItem("movies"); 
     return res.json();
   },
