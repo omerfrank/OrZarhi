@@ -17,26 +17,26 @@ export default function CastDetail({ navigate, castId }) {
 
   const checkAdmin = async () => {
     try {
-        const userRes = await api.getMe();
-        if (userRes.success && userRes.data.role === 'admin') {
-            setIsAdmin(true);
-        }
+      const userRes = await api.getMe();
+      if (userRes.success && userRes.data.role === 'admin') {
+        setIsAdmin(true);
+      }
     } catch (e) { console.error(e); }
   };
 
   const handleGlobalDelete = async () => {
     if (!window.confirm("ARE YOU SURE? This will delete the actor from the database and remove them from ALL movies.")) return;
-    
+
     try {
-        const res = await api.deleteCast(castId);
-        if (res.success) {
-            alert("Actor deleted successfully");
-            navigate("/movies"); // Redirect to home/movies page
-        } else {
-            setError(res.error || "Failed to delete actor");
-        }
+      const res = await api.deleteCast(castId);
+      if (res.success) {
+        alert("Actor deleted successfully");
+        navigate("/movies"); // Redirect to home/movies page
+      } else {
+        setError(res.error || "Failed to delete actor");
+      }
     } catch (err) {
-        setError("Network error during delete");
+      setError("Network error during delete");
     }
   };
 
@@ -58,8 +58,8 @@ export default function CastDetail({ navigate, castId }) {
         // Filter movies where this cast member appears
         // The API returns movies with a 'cast' array of objects (if populated) or IDs.
         // Based on MovieController, getAllMovies populates cast.
-        const memberMovies = moviesRes.data.filter(m => 
-            m.cast.some(c => (c._id === castId || c === castId))
+        const memberMovies = moviesRes.data.filter(m =>
+          m.cast.some(c => (c._id === castId || c === castId))
         );
         setMovies(memberMovies);
       }
@@ -72,9 +72,12 @@ export default function CastDetail({ navigate, castId }) {
   };
 
   const getRoleForMovie = (movieId) => {
-      if (!cast || !cast.roles) return "";
-      const entry = cast.roles.find(r => r.movie === movieId || r.movie?._id === movieId);
-      return entry ? ` as ${entry.role}` : "";
+    if (!cast || !cast.roles) return "";
+    const entry = member.roles.find(r =>
+      r.movie?.toString() === movieId ||
+      r.movie?._id?.toString() === movieId
+    );
+    return entry ? ` as ${entry.role}` : "";
   };
 
   if (loading) return <div style={styles.baseContainer}><p style={styles.loadingText}>Loading...</p></div>;
@@ -84,57 +87,59 @@ export default function CastDetail({ navigate, castId }) {
     <div style={styles.baseContainer}>
       <div style={styles.pageWrapper}>
         <div style={styles.header}>
-            <button onClick={() => navigate("/movies")} style={styles.linkButton}>← Back to Movies</button>
-            <button onClick={() => navigate("/profile")} style={styles.linkButton}>My Profile</button>
+          <button onClick={() => navigate("/movies")} style={styles.linkButton}>← Back to Movies</button>
+          <button onClick={() => navigate("/profile")} style={styles.linkButton}>My Profile</button>
         </div>
-        <div style={{display: "flex", gap: "10px"}}>
-              {isAdmin && (
-                  <button onClick={handleGlobalDelete} style={{...styles.button, backgroundColor: styles.danger}}>Delete Actor</button>
-              )}
+        <div style={{ display: "flex", gap: "10px" }}>
+          {isAdmin && (
+            <button onClick={handleGlobalDelete} style={{ ...styles.button, backgroundColor: styles.danger }}>Delete Actor</button>
+          )}
         </div>
 
         <div style={styles.movieHero}> {/* Reusing movie hero style for consistency */}
-          <img 
-            src={cast.photoURL} 
-            alt={cast.name} 
-            style={styles.movieDetailPoster} 
-            onError={(e) => { e.target.src = "https://via.placeholder.com/400x600?text=No+Photo"; }} 
+          <img
+            src={cast.photoURL}
+            alt={cast.name}
+            style={styles.movieDetailPoster}
+            loading="lazy"
+            onError={(e) => { e.target.src = "https://via.placeholder.com/400x600?text=No+Photo"; }}
           />
           <div style={styles.movieDetailInfo}>
             <h1 style={styles.movieDetailTitle}>{cast.name}</h1>
-            <p style={{...styles.movieDetailYear, color: styles.accentColor}}>
-                Born: {new Date(cast.birthDay).toLocaleDateString()}
+            <p style={{ ...styles.movieDetailYear, color: styles.accentColor }}>
+              Born: {new Date(cast.birthDay).toLocaleDateString()}
             </p>
-            <h3 style={{marginTop: "20px", color: styles.textMain}}>Biography</h3>
+            <h3 style={{ marginTop: "20px", color: styles.textMain }}>Biography</h3>
             <p style={styles.movieDetailDescription}>{cast.bio}</p>
           </div>
         </div>
 
         {/* Filmography Section */}
         <div style={styles.section}>
-            <h2 style={styles.sectionTitle}>Appears In ({movies.length})</h2>
-            {movies.length > 0 ? (
-                <div style={styles.relatedGrid}>
-                {movies.map((movie) => (
-                    <div key={movie._id} style={styles.relatedCard} onClick={() => navigate(`/movie/${movie._id}`)}>
-                    <img 
-                        src={movie.posterURL} 
-                        alt={movie.title} 
-                        style={styles.relatedPoster} 
-                        onError={(e) => { e.target.src = "https://via.placeholder.com/200x300?text=No+Image"; }} 
-                    />
-                    <h4 style={styles.relatedTitle}>{movie.title}</h4>
-                    {/* Display the specific role for this movie */}
-                    <div style={{fontSize: "13px", color: styles.accentColor, fontWeight: "bold", margin: "5px 0"}}>
-                        {getRoleForMovie(movie._id)}
-                    </div>
-                    <span style={{fontSize: "12px", color: "#666"}}>{new Date(movie.releaseDate).getFullYear()}</span>
-                    </div>
-                ))}
+          <h2 style={styles.sectionTitle}>Appears In ({movies.length})</h2>
+          {movies.length > 0 ? (
+            <div style={styles.relatedGrid}>
+              {movies.map((movie) => (
+                <div key={movie._id} style={styles.relatedCard} onClick={() => navigate(`/movie/${movie._id}`)}>
+                  <img
+                    src={movie.posterURL}
+                    alt={movie.title}
+                    style={styles.relatedPoster}
+                    loading="lazy"
+                    onError={(e) => { e.target.src = "https://via.placeholder.com/200x300?text=No+Image"; }}
+                  />
+                  <h4 style={styles.relatedTitle}>{movie.title}</h4>
+                  {/* Display the specific role for this movie */}
+                  <div style={{ fontSize: "13px", color: styles.accentColor, fontWeight: "bold", margin: "5px 0" }}>
+                    {getRoleForMovie(movie._id)}
+                  </div>
+                  <span style={{ fontSize: "12px", color: "#666" }}>{new Date(movie.releaseDate).getFullYear()}</span>
                 </div>
-            ) : (
-                <p style={{color: styles.textSecondary}}>No movies found for this actor.</p>
-            )}
+              ))}
+            </div>
+          ) : (
+            <p style={{ color: styles.textSecondary }}>No movies found for this actor.</p>
+          )}
         </div>
 
       </div>

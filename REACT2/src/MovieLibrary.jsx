@@ -266,6 +266,7 @@ export default function MovieLibrary({ navigate }) {
                 src={movie.posterURL}
                 alt={movie.title}
                 style={styles.moviePoster}
+                loading="lazy"
                 onError={(e) => {
                   e.target.src =
                     "https://via.placeholder.com/300x450?text=No+Image";

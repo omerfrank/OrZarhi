@@ -13,11 +13,11 @@ export default function MovieDetail({ navigate, movieId }) {
   const [error, setError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  
+
   // Review form state
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ title: "", rating: 5, text: "" });
-  const [hoverRating, setHoverRating] = useState(0); 
+  const [hoverRating, setHoverRating] = useState(0);
 
   // Cast Creation Modal State
   const [showCastModal, setShowCastModal] = useState(false);
@@ -27,7 +27,7 @@ export default function MovieDetail({ navigate, movieId }) {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [allCast, setAllCast] = useState([]);
   const [linkSearch, setLinkSearch] = useState("");
-  
+
   // NEW STATE: Track selected actor for linking and the input for their role
   const [selectedActor, setSelectedActor] = useState(null);
   const [roleInput, setRoleInput] = useState("");
@@ -141,28 +141,28 @@ export default function MovieDetail({ navigate, movieId }) {
 
   const handleAddCast = async () => {
     if (!newCast.name || !newCast.role || !newCast.birthDay) {
-        alert("Please fill in required fields (Name, Role, Birthday)");
-        return;
+      alert("Please fill in required fields (Name, Role, Birthday)");
+      return;
     }
     try {
-        const res = await api.addCast(newCast);
-        if (res.success) {
-            const createdCast = res.data;
-            const linkRes = await api.linkCastToMovie(movieId, createdCast._id, newCast.role);
-            if (linkRes.success) {
-                alert("Cast member created and linked!");
-                setShowCastModal(false);
-                setNewCast({ name: "", bio: "", role: "", photoURL: "", birthDay: "" });
-                loadMovieDetails();
-            } else {
-                alert("Cast created, but failed to link: " + (linkRes.error || "Unknown error"));
-            }
+      const res = await api.addCast(newCast);
+      if (res.success) {
+        const createdCast = res.data;
+        const linkRes = await api.linkCastToMovie(movieId, createdCast._id, newCast.role);
+        if (linkRes.success) {
+          alert("Cast member created and linked!");
+          setShowCastModal(false);
+          setNewCast({ name: "", bio: "", role: "", photoURL: "", birthDay: "" });
+          loadMovieDetails();
         } else {
-            alert(res.error || "Failed to add cast");
+          alert("Cast created, but failed to link: " + (linkRes.error || "Unknown error"));
         }
+      } else {
+        alert(res.error || "Failed to add cast");
+      }
     } catch (err) {
-        console.error(err);
-        alert("Error adding cast");
+      console.error(err);
+      alert("Error adding cast");
     }
   };
 
@@ -175,57 +175,60 @@ export default function MovieDetail({ navigate, movieId }) {
   // NEW FUNCTION: Submits the link after the role is entered in the modal
   const submitLinkActor = async () => {
     if (!roleInput.trim()) {
-        alert("Please enter a role");
-        return;
+      alert("Please enter a role");
+      return;
     }
 
     try {
-        const res = await api.linkCastToMovie(movieId, selectedActor._id, roleInput);
-        if (res.success) {
-            setShowLinkModal(false);
-            setSelectedActor(null);
-            setRoleInput("");
-            alert(`${selectedActor.name} added to movie!`);
-            loadMovieDetails(); 
-        } else {
-            alert(res.error || "Failed to link actor");
-        }
+      const res = await api.linkCastToMovie(movieId, selectedActor._id, roleInput);
+      if (res.success) {
+        setShowLinkModal(false);
+        setSelectedActor(null);
+        setRoleInput("");
+        alert(`${selectedActor.name} added to movie!`);
+        loadMovieDetails();
+      } else {
+        alert(res.error || "Failed to link actor");
+      }
     } catch (err) {
-        console.error(err);
-        alert("Error linking actor");
+      console.error(err);
+      alert("Error linking actor");
     }
   };
 
   const handleUnlinkCast = async (e, castId) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (!window.confirm("Remove this actor from this movie only?")) return;
-    
+
     try {
-        const res = await api.removeCastFromMovie(movieId, castId);
-        
-        if (res.success) {
-            setCast(cast.filter(c => c._id !== castId));
-        } else {
-            alert(res.error || "Failed to remove actor from movie");
-        }
+      const res = await api.removeCastFromMovie(movieId, castId);
+
+      if (res.success) {
+        setCast(cast.filter(c => c._id !== castId));
+      } else {
+        alert(res.error || "Failed to remove actor from movie");
+      }
     } catch (err) {
-        console.error(err);
-        alert("Error removing actor");
+      console.error(err);
+      alert("Error removing actor");
     }
   };
 
   // Helper to find the role for this specific movie
   const getRoleForMovie = (member) => {
-      if (!member.roles || !Array.isArray(member.roles)) return "Unknown Role";
-      const entry = member.roles.find(r => r.movie === movieId || r.movie?._id === movieId);
-      return entry ? entry.role : "Unknown Role";
+    if (!member.roles || !Array.isArray(member.roles)) return "Unknown Role";
+    const entry = member.roles.find(r =>
+      r.movie?.toString() === movieId ||
+      r.movie?._id?.toString() === movieId
+    );
+    return entry ? entry.role : "Unknown Role";
   };
 
   if (loading) return <div style={styles.baseContainer}><p style={styles.loadingText}>Loading movie...</p></div>;
   if (!movie) return <div style={styles.baseContainer}><p style={styles.error}>Movie not found</p></div>;
 
   const availableActors = allCast.filter(
-    actor => 
+    actor =>
       !cast.some(existing => existing._id === actor._id) &&
       actor.name.toLowerCase().includes(linkSearch.toLowerCase())
   );
@@ -241,11 +244,11 @@ export default function MovieDetail({ navigate, movieId }) {
         {error && <p style={styles.error}>{error}</p>}
 
         <div style={styles.movieHero}>
-          <img src={movie.posterURL} alt={movie.title} style={styles.movieDetailPoster} onError={(e) => { e.target.src = "https://via.placeholder.com/400x600?text=No+Image"; }} />
+          <img src={movie.posterURL} alt={movie.title} style={styles.movieDetailPoster} loading="lazy" onError={(e) => { e.target.src = "https://via.placeholder.com/400x600?text=No+Image"; }} />
           <div style={styles.movieDetailInfo}>
             <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
               <h1 style={styles.movieDetailTitle}>{movie.title}</h1>
-              <button style={{...styles.starButton, position: "static"}} onClick={toggleFavorite}>{isFavorite ? "★" : "☆"}</button>
+              <button style={{ ...styles.starButton, position: "static" }} onClick={toggleFavorite}>{isFavorite ? "★" : "☆"}</button>
             </div>
             <p style={styles.movieDetailYear}>{new Date(movie.releaseDate).getFullYear()}</p>
             <div style={styles.genreContainer}>
@@ -264,40 +267,40 @@ export default function MovieDetail({ navigate, movieId }) {
 
         {/* Cast Section */}
         <div style={styles.section}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-                <h2 style={styles.sectionTitle}>Cast</h2>
-                {isAdmin && (
-                    <div style={{ display: "flex", gap: "10px" }}>
-                        <button onClick={() => setShowLinkModal(true)} style={{...styles.linkButton, background: "#e9ecef", color: "#333"}}>
-                            🔗 Link Existing Actor
-                        </button>
-                        <button onClick={() => setShowCastModal(true)} style={styles.linkButton}>
-                            + Create New Actor
-                        </button>
-                    </div>
-                )}
-            </div>
-            
-            {cast.length > 0 ? (
-                <div style={styles.castGrid}>
-                {cast.map((member) => (
-                    <div 
-                        key={member._id} 
-                        style={{...styles.castCard, position: "relative", cursor: "pointer"}}
-                        onClick={() => navigate(`/cast/${member._id}`)}
-                    >
-                        {isAdmin && (
-                            <button onClick={(e) => handleUnlinkCast(e, member._id)} style={{ position: "absolute", top: 0, right: 0, background: styles.danger, color: "white", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", zIndex: 10 }}>✕</button>
-                        )}
-                        <img src={member.photoURL} alt={member.name} style={styles.castPhoto} onError={(e) => { e.target.src = "https://via.placeholder.com/200x250?text=No+Photo"; }} />
-                        <div style={styles.castInfo}>
-                            <h3 style={styles.castName}>{member.name}</h3>
-                            <p style={styles.castRole}>{getRoleForMovie(member)}</p>
-                        </div>
-                    </div>
-                ))}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+            <h2 style={styles.sectionTitle}>Cast</h2>
+            {isAdmin && (
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button onClick={() => setShowLinkModal(true)} style={{ ...styles.linkButton, background: "#e9ecef", color: "#333" }}>
+                  🔗 Link Existing Actor
+                </button>
+                <button onClick={() => setShowCastModal(true)} style={styles.linkButton}>
+                  + Create New Actor
+                </button>
+              </div>
+            )}
+          </div>
+
+          {cast.length > 0 ? (
+            <div style={styles.castGrid}>
+              {cast.map((member) => (
+                <div
+                  key={member._id}
+                  style={{ ...styles.castCard, position: "relative", cursor: "pointer" }}
+                  onClick={() => navigate(`/cast/${member._id}`)}
+                >
+                  {isAdmin && (
+                    <button onClick={(e) => handleUnlinkCast(e, member._id)} style={{ position: "absolute", top: 0, right: 0, background: styles.danger, color: "white", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", zIndex: 10 }}>✕</button>
+                  )}
+                  <img src={member.photoURL} alt={member.name} style={styles.castPhoto} loading="lazy" onError={(e) => { e.target.src = "https://via.placeholder.com/200x250?text=No+Photo"; }} />
+                  <div style={styles.castInfo}>
+                    <h3 style={styles.castName}>{member.name}</h3>
+                    <p style={styles.castRole}>{getRoleForMovie(member)}</p>
+                  </div>
                 </div>
-            ) : (<p style={{color: styles.textSecondary}}>No cast info available.</p>)}
+              ))}
+            </div>
+          ) : (<p style={{ color: styles.textSecondary }}>No cast info available.</p>)}
         </div>
 
         {/* Related Movies */}
@@ -307,7 +310,7 @@ export default function MovieDetail({ navigate, movieId }) {
             <div style={styles.relatedGrid}>
               {relatedMovies.map((related) => (
                 <div key={related._id} style={styles.relatedCard} onClick={() => { window.location.hash = `/movie/${related._id}`; window.location.reload(); }}>
-                  <img src={related.posterURL} alt={related.title} style={styles.relatedPoster} onError={(e) => { e.target.src = "https://via.placeholder.com/200x300?text=No+Image"; }} />
+                  <img src={related.posterURL} alt={related.title} style={styles.relatedPoster} loading="lazy" onError={(e) => { e.target.src = "https://via.placeholder.com/200x300?text=No+Image"; }} />
                   <h4 style={styles.relatedTitle}>{related.title}</h4>
                 </div>
               ))}
@@ -323,33 +326,33 @@ export default function MovieDetail({ navigate, movieId }) {
               <button onClick={() => setShowReviewForm(true)} style={styles.linkButton}>+ Write Review</button>
             )}
           </div>
-          
+
           {/* ... Review Form (No changes here) ... */}
           {showReviewForm && (
             <div style={styles.reviewForm}>
               <div>
                 <label style={styles.formLabel}>Review Title</label>
-                <input 
-                  type="text" 
-                  placeholder="Headline for your review" 
-                  value={reviewForm.title} 
-                  onChange={(e) => setReviewForm({...reviewForm, title: e.target.value})} 
-                  style={{...styles.input, width: "100%", boxSizing: "border-box"}} 
+                <input
+                  type="text"
+                  placeholder="Headline for your review"
+                  value={reviewForm.title}
+                  onChange={(e) => setReviewForm({ ...reviewForm, title: e.target.value })}
+                  style={{ ...styles.input, width: "100%", boxSizing: "border-box" }}
                 />
               </div>
               <div>
-                <label style={styles.formLabel}>Your Rating: <span style={{color: styles.accentColor}}>{reviewForm.rating}/10</span></label>
+                <label style={styles.formLabel}>Your Rating: <span style={{ color: styles.accentColor }}>{reviewForm.rating}/10</span></label>
                 <div style={styles.starContainer} onMouseLeave={() => setHoverRating(0)}>
                   {[...Array(10)].map((_, i) => {
                     const ratingValue = i + 1;
                     return (
-                      <span 
-                        key={i} 
+                      <span
+                        key={i}
                         style={{
-                          ...styles.starIcon, 
+                          ...styles.starIcon,
                           color: ratingValue <= (hoverRating || reviewForm.rating) ? styles.accentColor : "#444"
                         }}
-                        onClick={() => setReviewForm({...reviewForm, rating: ratingValue})}
+                        onClick={() => setReviewForm({ ...reviewForm, rating: ratingValue })}
                         onMouseEnter={() => setHoverRating(ratingValue)}
                         title={`${ratingValue}/10`}
                       >
@@ -361,23 +364,23 @@ export default function MovieDetail({ navigate, movieId }) {
               </div>
               <div>
                 <label style={styles.formLabel}>Review</label>
-                <textarea 
-                  placeholder="Write your review here..." 
-                  value={reviewForm.text} 
-                  onChange={(e) => setReviewForm({...reviewForm, text: e.target.value})} 
-                  style={{...styles.textarea, width: "100%", boxSizing: "border-box"}} 
-                  rows="5" 
+                <textarea
+                  placeholder="Write your review here..."
+                  value={reviewForm.text}
+                  onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
+                  style={{ ...styles.textarea, width: "100%", boxSizing: "border-box" }}
+                  rows="5"
                 />
               </div>
               <div style={styles.formActions}>
-                <button 
-                  onClick={() => setShowReviewForm(false)} 
+                <button
+                  onClick={() => setShowReviewForm(false)}
                   style={styles.cancelButton}
                 >
                   Cancel
                 </button>
-                <button 
-                  onClick={handleSubmitReview} 
+                <button
+                  onClick={handleSubmitReview}
                   style={styles.submitButton}
                 >
                   Submit Review
@@ -390,28 +393,28 @@ export default function MovieDetail({ navigate, movieId }) {
             {reviews.map((review) => (
               <div key={review._id} style={styles.reviewCard}>
                 <div style={styles.reviewHeader}>
-                  <div style={{display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%"}}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
                     <div>
-                        <h3 style={styles.reviewTitle}>{review.title}</h3>
-                        <p style={styles.reviewAuthor}>by {review.userID?.username || "Anonymous"}</p>
+                      <h3 style={styles.reviewTitle}>{review.title}</h3>
+                      <p style={styles.reviewAuthor}>by {review.userID?.username || "Anonymous"}</p>
                     </div>
-                    <div style={{display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "5px"}}>
-                        <div style={styles.reviewRating}>{review.rating}/10</div>
-                        {currentUser && review.userID && (review.userID._id === currentUser._id || isAdmin) && (
-                            <button 
-                                onClick={() => handleDeleteReview(review._id)}
-                                style={{
-                                    fontSize: "12px", 
-                                    color: styles.danger, 
-                                    background: "none", 
-                                    border: "none", 
-                                    cursor: "pointer", 
-                                    textDecoration: "underline"
-                                }}
-                            >
-                                Delete
-                            </button>
-                        )}
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "5px" }}>
+                      <div style={styles.reviewRating}>{review.rating}/10</div>
+                      {currentUser && review.userID && (review.userID._id === currentUser._id || isAdmin) && (
+                        <button
+                          onClick={() => handleDeleteReview(review._id)}
+                          style={{
+                            fontSize: "12px",
+                            color: styles.danger,
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            textDecoration: "underline"
+                          }}
+                        >
+                          Delete
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -425,106 +428,108 @@ export default function MovieDetail({ navigate, movieId }) {
 
         {/* Create Cast Modal */}
         {showCastModal && (
-            <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.8)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
-                <div style={{...styles.card, maxWidth: "500px", position: "relative", width: "90%"}}>
-                    <h2 style={styles.title}>Create New Actor</h2>
-                    <div style={styles.form}>
-                        <input style={styles.input} placeholder="Name" value={newCast.name} onChange={e => setNewCast({...newCast, name: e.target.value})} />
-                        <input style={styles.input} placeholder="Role (e.g. Neo)" value={newCast.role} onChange={e => setNewCast({...newCast, role: e.target.value})} />
-                         <input style={styles.input} type="date" placeholder="Birthday" value={newCast.birthDay} onChange={e => setNewCast({...newCast, birthDay: e.target.value})} />
-                        <input style={styles.input} placeholder="Photo URL" value={newCast.photoURL} onChange={e => setNewCast({...newCast, photoURL: e.target.value})} />
-                        <textarea style={styles.textarea} placeholder="Bio" value={newCast.bio} onChange={e => setNewCast({...newCast, bio: e.target.value})} />
-                        <div style={{display: "flex", gap: "10px", marginTop: "10px"}}>
-                            <button onClick={handleAddCast} style={{...styles.button, flex: 1}}>Create & Link</button>
-                            <button onClick={() => setShowCastModal(false)} style={{...styles.linkButton, flex: 1, borderColor: styles.textSecondary, color: styles.textSecondary}}>Cancel</button>
-                        </div>
-                    </div>
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.8)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
+            <div style={{ ...styles.card, maxWidth: "500px", position: "relative", width: "90%" }}>
+              <h2 style={styles.title}>Create New Actor</h2>
+              <div style={styles.form}>
+                <input style={styles.input} placeholder="Name" value={newCast.name} onChange={e => setNewCast({ ...newCast, name: e.target.value })} />
+                <input style={styles.input} placeholder="Role (e.g. Neo)" value={newCast.role} onChange={e => setNewCast({ ...newCast, role: e.target.value })} />
+                <input style={styles.input} type="date" placeholder="Birthday" value={newCast.birthDay} onChange={e => setNewCast({ ...newCast, birthDay: e.target.value })} />
+                <input style={styles.input} placeholder="Photo URL" value={newCast.photoURL} onChange={e => setNewCast({ ...newCast, photoURL: e.target.value })} />
+                <textarea style={styles.textarea} placeholder="Bio" value={newCast.bio} onChange={e => setNewCast({ ...newCast, bio: e.target.value })} />
+                <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                  <button onClick={handleAddCast} style={{ ...styles.button, flex: 1 }}>Create & Link</button>
+                  <button onClick={() => setShowCastModal(false)} style={{ ...styles.linkButton, flex: 1, borderColor: styles.textSecondary, color: styles.textSecondary }}>Cancel</button>
                 </div>
+              </div>
             </div>
+          </div>
         )}
 
         {/* Link Existing Actor Modal*/}
         {showLinkModal && (
-            <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.8)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
-                <div style={{...styles.card, maxWidth: "600px", width: "90%", maxHeight: "80vh", display: "flex", flexDirection: "column" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-                        <h2 style={{...styles.title, margin: 0}}>Link Actor to Movie</h2>
-                        <button onClick={() => setShowLinkModal(false)} style={{background: "none", border: "none", fontSize: "20px", cursor: "pointer"}}>✕</button>
-                    </div>
-                    
-                    {selectedActor ? (
-                         <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                <img 
-                                    src={selectedActor.photoURL} 
-                                    alt={selectedActor.name} 
-                                    style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover" }}
-                                    onError={(e) => e.target.src = "https://via.placeholder.com/50"}
-                                />
-                                <div>
-                                    <h3 style={{ margin: 0 }}>{selectedActor.name}</h3>
-                                    <p style={{ margin: 0, fontSize: "12px", color: "#666" }}>Enter role for this movie</p>
-                                </div>
-                            </div>
-                            
-                            <input 
-                                style={styles.input} 
-                                placeholder="Role (e.g. Commander Shepard)"
-                                value={roleInput}
-                                onChange={e => setRoleInput(e.target.value)}
-                                autoFocus
-                            />
-                            
-                            <div style={{display: "flex", gap: "10px", marginTop: "10px"}}>
-                                <button onClick={submitLinkActor} style={{...styles.button, flex: 1}}>Confirm Link</button>
-                                <button onClick={() => setSelectedActor(null)} style={{...styles.cancelButton, flex: 1}}>Back to Search</button>
-                            </div>
-                        </div>
-                    ) : (
-                        <>
-                            <input 
-                                style={{...styles.input, marginBottom: "20px"}} 
-                                placeholder="Search actors..." 
-                                value={linkSearch}
-                                onChange={(e) => setLinkSearch(e.target.value)}
-                                autoFocus
-                            />
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.8)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
+            <div style={{ ...styles.card, maxWidth: "600px", width: "90%", maxHeight: "80vh", display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <h2 style={{ ...styles.title, margin: 0 }}>Link Actor to Movie</h2>
+                <button onClick={() => setShowLinkModal(false)} style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}>✕</button>
+              </div>
 
-                            <div style={{ overflowY: "auto", flex: 1, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: "15px" }}>
-                                {availableActors.map(actor => (
-                                    <div 
-                                        key={actor._id} 
-                                        onClick={() => handleActorSelect(actor)}
-                                        style={{ 
-                                            border: "1px solid #ddd", 
-                                            borderRadius: "8px", 
-                                            padding: "10px", 
-                                            cursor: "pointer", 
-                                            textAlign: "center",
-                                            transition: "transform 0.2s"
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-                                        onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-                                    >
-                                        <img 
-                                            src={actor.photoURL} 
-                                            alt={actor.name} 
-                                            style={{ width: "100%", height: "120px", objectFit: "cover", borderRadius: "4px", marginBottom: "8px" }}
-                                            onError={(e) => e.target.src = "https://via.placeholder.com/100x120?text=No+Photo"}
-                                        />
-                                        <div style={{ fontWeight: "bold", fontSize: "14px" }}>{actor.name}</div>
-                                    </div>
-                                ))}
-                                {availableActors.length === 0 && (
-                                    <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "20px", color: "#666" }}>
-                                        No actors found matching "{linkSearch}"
-                                    </div>
-                                )}
-                            </div>
-                        </>
-                    )}
+              {selectedActor ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <img
+                      src={selectedActor.photoURL}
+                      alt={selectedActor.name}
+                      style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover" }}
+                      loading="lazy"
+                      onError={(e) => e.target.src = "https://via.placeholder.com/50"}
+                    />
+                    <div>
+                      <h3 style={{ margin: 0 }}>{selectedActor.name}</h3>
+                      <p style={{ margin: 0, fontSize: "12px", color: "#666" }}>Enter role for this movie</p>
+                    </div>
+                  </div>
+
+                  <input
+                    style={styles.input}
+                    placeholder="Role (e.g. Commander Shepard)"
+                    value={roleInput}
+                    onChange={e => setRoleInput(e.target.value)}
+                    autoFocus
+                  />
+
+                  <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                    <button onClick={submitLinkActor} style={{ ...styles.button, flex: 1 }}>Confirm Link</button>
+                    <button onClick={() => setSelectedActor(null)} style={{ ...styles.cancelButton, flex: 1 }}>Back to Search</button>
+                  </div>
                 </div>
+              ) : (
+                <>
+                  <input
+                    style={{ ...styles.input, marginBottom: "20px" }}
+                    placeholder="Search actors..."
+                    value={linkSearch}
+                    onChange={(e) => setLinkSearch(e.target.value)}
+                    autoFocus
+                  />
+
+                  <div style={{ overflowY: "auto", flex: 1, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: "15px" }}>
+                    {availableActors.map(actor => (
+                      <div
+                        key={actor._id}
+                        onClick={() => handleActorSelect(actor)}
+                        style={{
+                          border: "1px solid #ddd",
+                          borderRadius: "8px",
+                          padding: "10px",
+                          cursor: "pointer",
+                          textAlign: "center",
+                          transition: "transform 0.2s"
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                      >
+                        <img
+                          src={actor.photoURL}
+                          alt={actor.name}
+                          style={{ width: "100%", height: "120px", objectFit: "cover", borderRadius: "4px", marginBottom: "8px" }}
+                          loading="lazy"
+                          onError={(e) => e.target.src = "https://via.placeholder.com/100x120?text=No+Photo"}
+                        />
+                        <div style={{ fontWeight: "bold", fontSize: "14px" }}>{actor.name}</div>
+                      </div>
+                    ))}
+                    {availableActors.length === 0 && (
+                      <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "20px", color: "#666" }}>
+                        No actors found matching "{linkSearch}"
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
+          </div>
         )}
       </div>
     </div>
