@@ -33,10 +33,23 @@ export const api = {
   },
 
   getMovies: async () => {
+    // 1. Check if movies are already in local storage
+    const cachedMovies = localStorage.getItem("movies");
+    if (cachedMovies) {
+      return { success: true, data: JSON.parse(cachedMovies) };
+    }
+
+    // 2. If not, fetch from the backend
     const res = await fetch(`${API_BASE}/movie`, {
       credentials: "include",
     });
-    return res.json();
+    const data = await res.json();
+    
+    // 3. Save the result to local storage for future use
+    if (data.success) {
+      localStorage.setItem("movies", JSON.stringify(data.data));
+    }
+    return data;
   },
 
   getMovie: async (id) => {
@@ -46,15 +59,18 @@ export const api = {
     return res.json();
   },
 
-  addMovie: async (movieData) => {
+addMovie: async (movieData) => {
     const res = await fetch(`${API_BASE}/movie`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify(movieData),
     });
+    // Invalidate cache so the library refreshes next time
+    localStorage.removeItem("movies"); 
     return res.json();
   },
+  
   updateMovie: async (id, movieData) => {
     const res = await fetch(`${API_BASE}/movie/${id}`, {
       method: "PUT",
@@ -62,6 +78,8 @@ export const api = {
       credentials: "include",
       body: JSON.stringify(movieData),
     });
+    // Invalidate cache so the library refreshes next time
+    localStorage.removeItem("movies"); 
     return res.json();
   },
 
@@ -70,6 +88,8 @@ export const api = {
       method: "DELETE",
       credentials: "include",
     });
+    // Invalidate cache so the library refreshes next time
+    localStorage.removeItem("movies"); 
     return res.json();
   },
 
