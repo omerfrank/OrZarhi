@@ -73,10 +73,7 @@ export default function CastDetail({ navigate, castId }) {
 
   const getRoleForMovie = (movieId) => {
     if (!cast || !cast.roles) return "";
-    const entry = member.roles.find(r =>
-      r.movie?.toString() === movieId ||
-      r.movie?._id?.toString() === movieId
-    );
+    const entry = cast.roles.find(r => r.movie === movieId || r.movie?._id === movieId);
     return entry ? ` as ${entry.role}` : "";
   };
 

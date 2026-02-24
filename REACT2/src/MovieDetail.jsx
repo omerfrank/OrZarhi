@@ -217,10 +217,7 @@ export default function MovieDetail({ navigate, movieId }) {
   // Helper to find the role for this specific movie
   const getRoleForMovie = (member) => {
     if (!member.roles || !Array.isArray(member.roles)) return "Unknown Role";
-    const entry = member.roles.find(r =>
-      r.movie?.toString() === movieId ||
-      r.movie?._id?.toString() === movieId
-    );
+    const entry = member.roles.find(r => r.movie === movieId || r.movie?._id === movieId);
     return entry ? entry.role : "Unknown Role";
   };
 
